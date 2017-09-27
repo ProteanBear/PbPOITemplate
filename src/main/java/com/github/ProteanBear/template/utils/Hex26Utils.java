@@ -1,6 +1,8 @@
 package com.github.ProteanBear.template.utils;
 
 /**
+ * Hex26(A,B,C,……,Z,…… like Excel's column) exchange Hex 10 tools
+ *
  * @author ProteanBear
  */
 public class Hex26Utils
@@ -24,7 +26,7 @@ public class Hex26Utils
         if(hex10>26*26) return hex10+"";
 
         StringBuilder result=new StringBuilder();
-        int multiple=Math.max((hex10-1)/26,0),remainder=hex10%26;
+        int multiple=Math.max((hex10-1)/26,0), remainder=hex10%26;
         result.append((multiple==0)?"":numbers[multiple])
                 .append(remainder==0?numbers[26]:numbers[remainder]);
 
