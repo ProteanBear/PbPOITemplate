@@ -1,13 +1,10 @@
 package com.github.ProteanBear.template.excel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 /**
@@ -21,38 +18,44 @@ public class PbPOIExcelTemplateTest
      * Test for loading excel file
      */
     @Test
-    public void readExcelFile()
+    public void readExcelFileNormalWithTitle()
     {
         try
         {
+            File excelFile=new File(getClass().getResource("/normalWithTitle.xlsx").getPath());
             PbPOIExcelTemplate excelTemplate=new PbPOIExcelTemplate();
-            List<ExcelTestBean> list=(List<ExcelTestBean>)excelTemplate.readFrom(new File(getClass().getResource("/normalWithTitle.xlsx").getPath()),ExcelTestBean.class);
+            List<ExcelTestBean> list=(List<ExcelTestBean>)excelTemplate
+                    .readFrom(excelFile,ExcelTestBean.class);
 
             Assert.assertTrue("读取Excel错误！",(list!=null&&!list.isEmpty()));
             ObjectMapper objectMapper=new ObjectMapper();
             System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(list));
         }
-        catch(NoSuchMethodException e)
+        catch(Exception e)
         {
             e.printStackTrace();
         }
-        catch(IllegalAccessException e)
+    }
+
+    /**
+     * Test for loading excel file
+     */
+    @Test
+    public void readExcelFileNormalNoTitle()
+    {
+        try
         {
-            e.printStackTrace();
+            File excelFile=new File(getClass().getResource("/normalNoTitle.xlsx").getPath());
+            PbPOIExcelTemplate excelTemplate=new PbPOIExcelTemplate();
+            List<ExcelTestBean> list=(List<ExcelTestBean>)excelTemplate
+                    .setTitleLine(-1)
+                    .readFrom(excelFile,ExcelNoTitleTestBean.class);
+
+            Assert.assertTrue("读取Excel错误！",(list!=null&&!list.isEmpty()));
+            ObjectMapper objectMapper=new ObjectMapper();
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(list));
         }
-        catch(InvocationTargetException e)
-        {
-            e.printStackTrace();
-        }
-        catch(InvalidFormatException e)
-        {
-            e.printStackTrace();
-        }
-        catch(IOException e)
-        {
-            e.printStackTrace();
-        }
-        catch(InstantiationException e)
+        catch(Exception e)
         {
             e.printStackTrace();
         }
