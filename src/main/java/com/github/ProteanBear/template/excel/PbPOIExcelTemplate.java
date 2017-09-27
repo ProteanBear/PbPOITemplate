@@ -68,7 +68,7 @@ public class PbPOIExcelTemplate
                     //Set title to "A……Z" mode
                     for(int i=0;i<colNum;i++)
                     {
-                        indexTitleMap.put(i+"",Hex26Utils.from(i));
+                        indexTitleMap.put(i+"",Hex26Utils.from(i+1));
                     }
                 }
                 //If current row is title line
