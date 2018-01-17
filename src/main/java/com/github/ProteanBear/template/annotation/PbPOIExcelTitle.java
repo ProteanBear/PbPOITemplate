@@ -14,4 +14,10 @@ public @interface PbPOIExcelTitle
 {
     //title
     String value();
+    //Date pattern
+    String dateFormat() default "yyyy-MM-dd HH:mm:ss";
+    //Is file path
+    boolean isFilePath() default false;
+    //the base file path
+    String baseFilePath() default "";
 }

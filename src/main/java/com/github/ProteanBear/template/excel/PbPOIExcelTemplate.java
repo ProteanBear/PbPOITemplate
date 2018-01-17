@@ -1,16 +1,23 @@
 package com.github.ProteanBear.template.excel;
 
+import com.github.ProteanBear.template.annotation.PbPOIExcel;
 import com.github.ProteanBear.template.annotation.PbPOIExcelTitle;
 import com.github.ProteanBear.template.utils.ClassUtils;
 import com.github.ProteanBear.template.utils.Hex26Utils;
+import com.github.ProteanBear.template.utils.StringUtils;
+import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The tools is created for easy use of Apache POI.
@@ -28,11 +35,13 @@ public class PbPOIExcelTemplate
 
     /**
      * Read excel file and write to list of T class
+     *
      * @param excelFile The file .xls or .xlsx
      * @return
      */
     public List<?> readFrom(File excelFile,Class<?> returnClass)
-            throws IOException, InvalidFormatException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException
+            throws IOException, InvalidFormatException, NoSuchMethodException, IllegalAccessException,
+            InvocationTargetException, InstantiationException
     {
         //Load Excel File
         Workbook workbook=WorkbookFactory.create(excelFile);
@@ -63,7 +72,7 @@ public class PbPOIExcelTemplate
                 int colNum=row.getLastCellNum();
 
                 //Set index title for not title excel
-                if(titleLine==-1&&rowNum==0)
+                if(titleLine==-1 && rowNum==0)
                 {
                     //Set title to "A……Z" mode
                     for(int i=0;i<colNum;i++)
@@ -101,6 +110,101 @@ public class PbPOIExcelTemplate
         }
 
         return result;
+    }
+
+    /**
+     * Writes the specified data list to an Excel file.
+     *
+     * @param excelFile the excel file
+     * @param data      the specified data list.Multiple sets of data to generate multiple sheets.
+     */
+    public void writeTo(File excelFile,List<?>... data) throws IOException
+    {
+        //File exists, delete the old file
+        if(excelFile.exists()) excelFile.delete();
+        excelFile.createNewFile();
+
+        writeTo(new FileOutputStream(excelFile),data);
+    }
+
+    /**
+     * Writes the specified data list to an Excel file.
+     *
+     * @param outputStream Output stream
+     * @param data         the specified data list.Multiple sets of data to generate multiple sheets.
+     */
+    public void writeTo(OutputStream outputStream,List<?>... data) throws IOException
+    {
+        //Declare a workbook
+        HSSFWorkbook workbook=new HSSFWorkbook();
+
+        //Create the sheets
+        HSSFSheet sheet;
+        Class curClass;
+        PbPOIExcel pbPOIExcelAnnotation;
+        Map<PbPOIExcelTitle,Method> getMethodMap;
+        for(List<?> oneDataList : data)
+        {
+            if(oneDataList.isEmpty()) continue;
+
+            //Get the class corresponding annotation
+            curClass=oneDataList.get(0).getClass();
+            pbPOIExcelAnnotation=oneDataList.get(0).getClass().getAnnotation(PbPOIExcel.class);
+            if(pbPOIExcelAnnotation==null) continue;
+
+            //Create a sheet
+            String sheetTitle=pbPOIExcelAnnotation.sheetTitle();
+            sheet=StringUtils.isBlank(sheetTitle)?workbook.createSheet():workbook.createSheet(sheetTitle);
+            int curRow=0, index=0;
+
+            //Generate the table title line
+            try
+            {
+                getMethodMap=ClassUtils.titleMapGetMethodBy(PbPOIExcelTitle.class,curClass);
+
+                HSSFRow row=sheet.createRow(curRow++);
+                for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
+                {
+                    HSSFCell cell=row.createCell(index);
+                    set(cell,pbPOIExcelTitle.value(),pbPOIExcelTitle);
+                    index++;
+                }
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+                continue;
+            }
+
+            //Generate the table content line
+            for(int i=0;i<oneDataList.size();i++)
+            {
+                HSSFRow row=sheet.createRow(curRow++);
+                index=0;
+                Object oneData=oneDataList.get(0);
+
+                for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
+                {
+                    HSSFCell cell=row.createCell(index);
+                    try
+                    {
+                        set(
+                                cell,
+                                getMethodMap.get(pbPOIExcelTitle.value()).invoke(oneData),
+                                pbPOIExcelTitle
+                        );
+                    }
+                    catch(Exception e)
+                    {
+                        e.printStackTrace();
+                        set(cell,"",pbPOIExcelTitle);
+                    }
+                    index++;
+                }
+            }
+        }
+
+        workbook.write(outputStream);
     }
 
     /**
@@ -166,5 +270,73 @@ public class PbPOIExcelTemplate
     {
         this.titleLine=titleLine;
         return this;
+    }
+
+    /**
+     * Set content to cells, based on the type of content
+     *
+     * @param cell            the cell
+     * @param content         the content object
+     * @param pbPOIExcelTitle the annotation
+     */
+    public void set(Cell cell,Object content,PbPOIExcelTitle pbPOIExcelTitle)
+    {
+        String textValue=null;
+
+        //If the content object is null
+        if(content==null) textValue="";
+
+        //If the content object is boolean
+        if(content instanceof Boolean)
+        {
+            cell.setCellType(CellType.BOOLEAN);
+            cell.setCellValue(((Boolean)content).booleanValue());
+        }
+        //If the content object is Date
+        else if(content instanceof Date)
+        {
+            cell.setCellType(CellType.NUMERIC);
+            cell.setCellValue(((Date)content));
+
+            Workbook workbook=cell.getSheet().getWorkbook();
+            CellStyle cellStyle=workbook.createCellStyle();
+            cellStyle.setDataFormat(workbook.createDataFormat().getFormat(pbPOIExcelTitle.dateFormat()));
+            cell.setCellStyle(cellStyle);
+        }
+        //If the content is a picture
+        else if(content instanceof byte[])
+        {
+        }
+        else if(content instanceof File)
+        {
+        }
+        //If the content is a picture file path
+        else if((content instanceof String)
+                &&pbPOIExcelTitle.isFilePath())
+        {
+        }
+        //Other
+        else textValue=content.toString();
+
+        //If the content is a number or string
+        if(textValue!=null)
+        {
+            //If the content is a number
+            Pattern p = Pattern.compile("^//d+(//.//d+)?$");
+            Matcher matcher = p.matcher(textValue);
+            if(matcher.matches())
+            {
+                cell.setCellType(CellType.NUMERIC);
+                cell.setCellValue(Double.parseDouble(textValue));
+            }
+            //If the content is a string
+            else
+            {
+                cell.setCellType(CellType.STRING);
+                HSSFRichTextString richString = new HSSFRichTextString(
+                        textValue);
+                cell.setCellValue(richString);
+            }
+        }
     }
 }
