@@ -5,6 +5,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -56,6 +59,35 @@ public class PbPOIExcelTemplateTest
             System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(list));
         }
         catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Write a excel file.
+     */
+    @Test
+    public void writeExcelFile()
+    {
+        File excelFile=new File(getClass().getResource("/").getPath(),"writeTest.xlsx");
+        List<ExcelTestBean> writeData=new ArrayList<>(5);
+        for(int i=0;i<5;i++)
+        {
+            ExcelTestBean excelTestBean=new ExcelTestBean();
+            excelTestBean.setTitle("标题"+i);
+            excelTestBean.setCount(new Double(i));
+            excelTestBean.setAverage((new Double(i)).doubleValue()/10.0);
+            excelTestBean.setDateTime(new Date());
+            writeData.add(excelTestBean);
+        }
+
+        PbPOIExcelTemplate excelTemplate=new PbPOIExcelTemplate();
+        try
+        {
+            excelTemplate.writeTo(excelFile,writeData);
+        }
+        catch(IOException e)
         {
             e.printStackTrace();
         }

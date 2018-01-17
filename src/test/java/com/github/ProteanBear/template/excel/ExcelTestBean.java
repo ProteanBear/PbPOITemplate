@@ -1,6 +1,7 @@
 package com.github.ProteanBear.template.excel;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.github.ProteanBear.template.annotation.PbPOIExcel;
 import com.github.ProteanBear.template.annotation.PbPOIExcelTitle;
 
 import java.util.Date;
@@ -8,6 +9,7 @@ import java.util.Date;
 /**
  *
  */
+@PbPOIExcel(sheetTitle = "POI导出测试")
 public class ExcelTestBean
 {
     @PbPOIExcelTitle("标题")
