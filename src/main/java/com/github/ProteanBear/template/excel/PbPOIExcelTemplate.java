@@ -275,7 +275,7 @@ public class PbPOIExcelTemplate
             {
                 row=sheet.createRow(curRow++);
                 index=0;
-                Object oneData=oneDataList.get(0);
+                Object oneData=oneDataList.get(i);
 
                 for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
                 {
@@ -356,7 +356,7 @@ public class PbPOIExcelTemplate
             {
                 row=sheet.createRow(curRow++);
                 index=0;
-                Object oneData=oneDataList.get(0);
+                Object oneData=oneDataList.get(i);
 
                 for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
                 {
