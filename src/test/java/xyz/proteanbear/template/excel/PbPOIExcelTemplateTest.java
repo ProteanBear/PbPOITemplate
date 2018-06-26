@@ -1,4 +1,4 @@
-package com.github.ProteanBear.template.excel;
+package xyz.proteanbear.template.excel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
@@ -25,10 +25,10 @@ public class PbPOIExcelTemplateTest
     {
         try
         {
-            File excelFile=new File(getClass().getResource("/normalWithTitle.xlsx").getPath());
+            File excelFile=new File(getClass().getResource("/1.xlsx").getPath());
             PbPOIExcelTemplate excelTemplate=new PbPOIExcelTemplate();
-            List<ExcelTestBean> list=(List<ExcelTestBean>)excelTemplate
-                    .readFrom(excelFile,ExcelTestBean.class);
+            List<ReportInfo> list=(List<ReportInfo>)excelTemplate
+                    .readFrom(excelFile,ReportInfo.class);
 
             Assert.assertTrue("读取Excel错误！",(list!=null&&!list.isEmpty()));
             ObjectMapper objectMapper=new ObjectMapper();

@@ -1,4 +1,4 @@
-package com.github.ProteanBear.template.utils;
+package xyz.proteanbear.template.utils;
 
 /**
  * Hex26(A,B,C,……,Z,…… like Excel's column) exchange Hex 10 tools

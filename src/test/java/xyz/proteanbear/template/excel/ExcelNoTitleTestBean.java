@@ -1,27 +1,25 @@
-package com.github.ProteanBear.template.excel;
+package xyz.proteanbear.template.excel;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.github.ProteanBear.template.annotation.PbPOIExcel;
-import com.github.ProteanBear.template.annotation.PbPOIExcelTitle;
+import xyz.proteanbear.template.annotation.PbPOIExcelTitle;
 
 import java.util.Date;
 
 /**
  *
  */
-@PbPOIExcel(sheetTitle = "POI导出测试")
-public class ExcelTestBean
+public class ExcelNoTitleTestBean
 {
-    @PbPOIExcelTitle("标题")
+    @PbPOIExcelTitle("A")
     private String title;
 
-    @PbPOIExcelTitle("总数")
+    @PbPOIExcelTitle("B")
     private Double count;
 
-    @PbPOIExcelTitle("平均数")
+    @PbPOIExcelTitle("C")
     private Double average;
 
-    @PbPOIExcelTitle("时间")
+    @PbPOIExcelTitle("D")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "GMT+8")
     private Date dateTime;
 

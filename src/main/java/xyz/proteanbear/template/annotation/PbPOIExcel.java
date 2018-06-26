@@ -1,4 +1,4 @@
-package com.github.ProteanBear.template.annotation;
+package xyz.proteanbear.template.annotation;
 
 import java.lang.annotation.*;
 

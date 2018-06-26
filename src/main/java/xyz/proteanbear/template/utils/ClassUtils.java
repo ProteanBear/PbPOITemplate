@@ -1,4 +1,4 @@
-package com.github.ProteanBear.template.utils;
+package xyz.proteanbear.template.utils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -81,6 +81,44 @@ public class ClassUtils
             valueMethod=annotationClass.getMethod("value");
             //field's setter method
             result.put((String)valueMethod.invoke(annotation),methodSetterOf(field,ofClass));
+        }
+
+        return result;
+    }
+
+    /**
+     * generate title->annotation map by annotation
+     *
+     * @param annotationClass the annotation class
+     * @param ofClass         the primary class
+     * @return the hash map for valueKey to the method
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    public static final Map<String,Object> titleMapAnnotationBy(Class annotationClass,Class ofClass)
+            throws InvocationTargetException, IllegalAccessException, NoSuchMethodException
+    {
+        Map<String,Object> result=new LinkedHashMap<>();
+
+        //All fields
+        Field[] fields=ofClass.getDeclaredFields();
+        Field field=null;
+        Method valueMethod=null;
+        Object annotation=null;
+        for(int i=0, length=fields.length;i<length;i++)
+        {
+            //Get current field
+            field=fields[i];
+            //Get annotation
+            annotation=field.getAnnotation(annotationClass);
+
+            //Annotation is null
+            if(annotation==null) continue;
+            //Annotation's value method
+            valueMethod=annotationClass.getMethod("value");
+            //field's setter method
+            result.put((String)valueMethod.invoke(annotation),annotation);
         }
 
         return result;

@@ -1,4 +1,4 @@
-package com.github.ProteanBear.template.utils;
+package xyz.proteanbear.template.utils;
 
 /**
  * String tool

@@ -1,11 +1,11 @@
-package com.github.ProteanBear.template.excel;
+package xyz.proteanbear.template.excel;
 
-import com.github.ProteanBear.template.annotation.PbPOIExcel;
-import com.github.ProteanBear.template.annotation.PbPOIExcelTitle;
-import com.github.ProteanBear.template.utils.ClassUtils;
-import com.github.ProteanBear.template.utils.FileSuffix;
-import com.github.ProteanBear.template.utils.Hex26Utils;
-import com.github.ProteanBear.template.utils.StringUtils;
+import xyz.proteanbear.template.annotation.PbPOIExcel;
+import xyz.proteanbear.template.annotation.PbPOIExcelTitle;
+import xyz.proteanbear.template.utils.ClassUtils;
+import xyz.proteanbear.template.utils.FileSuffix;
+import xyz.proteanbear.template.utils.Hex26Utils;
+import xyz.proteanbear.template.utils.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
@@ -18,8 +18,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -46,13 +49,15 @@ public class PbPOIExcelTemplate
      */
     public List<?> readFrom(File excelFile,Class<?> returnClass)
             throws IOException, InvalidFormatException, NoSuchMethodException, IllegalAccessException,
-            InvocationTargetException, InstantiationException
+            InvocationTargetException, InstantiationException, ParseException
     {
         //Load Excel File
         Workbook workbook=WorkbookFactory.create(excelFile);
 
         //Get returnClass title->setMethod map by annotation
         Map<String,Method> titleMethodMap=ClassUtils.titleMapSetMethodBy(PbPOIExcelTitle.class,returnClass);
+        //Get resultClass title->Annotation map
+        Map<String,Object> titleAnnotationMap=ClassUtils.titleMapAnnotationBy(PbPOIExcelTitle.class,returnClass);
 
         //Record index->title map
         Map<String,String> indexTitleMap=new HashMap<String,String>();
@@ -104,8 +109,21 @@ public class PbPOIExcelTemplate
                 {
                     //Set field content,index->title->setMethod
                     Method method=titleMethodMap.get(indexTitleMap.get(index+""));
+                    PbPOIExcelTitle annotation=(PbPOIExcelTitle)titleAnnotationMap.get(indexTitleMap.get(index+""));
                     if(method==null) continue;
-                    method.invoke(object,valueOf(row.getCell(index)));
+                    Object value=valueOf(row.getCell(index));
+
+                    //Date -> String
+                    if(method.getParameterTypes()[0].isAssignableFrom(String.class))
+                    {
+                        value=(value instanceof Date)?(new SimpleDateFormat(annotation.dateFormat()).format(value)):(value+"");
+                    }
+                    //String -> Date
+                    if(method.getParameterTypes()[0].isAssignableFrom(Date.class))
+                    {
+                        value=(value instanceof String)?(new SimpleDateFormat(annotation.dateFormat()).parse(value+"")):value;
+                    }
+                    method.invoke(object,value);
                 }
                 //Insert into list result.
                 result.add(object);
