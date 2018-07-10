@@ -7,12 +7,14 @@ package xyz.proteanbear.template.utils;
  */
 public class Hex26Utils
 {
-    //All numbers
+    /**
+     * All numbers
+     */
     private static final String[] numbers=new String[]{"","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
 
     /**
-     * Hex 10 to Hex 26<br/>
-     * Number must be between 1 and 676
+     * Hex 10 to Hex 26.
+     * Number must be between 1 and 676.
      *
      * @param hex10 the number of hex 10
      * @return the number string of hex 26,eg.A,B,C

@@ -15,7 +15,7 @@ import java.util.Map;
 public class ClassUtils
 {
     /**
-     * generate title->getMethod map by annotation
+     * generate title — getMethod map by annotation
      *
      * @param annotationClass the annotation class
      * @param ofClass         the primary class
@@ -45,10 +45,11 @@ public class ClassUtils
     }
 
     /**
-     * generate title->setMethod map by annotation
+     * generate title — setMethod map by annotation
      *
-     * @param annotationClass the annotation class
-     * @param ofClass         the primary class
+     * @param annotationClass    the annotation class
+     * @param ofClass            the primary class
+     * @param titleMapAnnotation the map for title — annotation object
      * @return the hash map for valueKey to the method
      * @throws NoSuchMethodException     No such method
      * @throws InvocationTargetException Invocation target
