@@ -18,7 +18,7 @@ public enum FileSuffix
     private String suffix;
 
     /**
-     * @param suffix
+     * @param suffix the file suffix
      */
     FileSuffix(String suffix)
     {
@@ -26,22 +26,21 @@ public enum FileSuffix
     }
 
     /**
-     *
-     * @param name
-     * @return
+     * @param name file name
+     * @return the file suffix
      */
     public boolean check(String name)
     {
-        return name==null?false:(name.endsWith(suffix));
+        return name!=null && (name.endsWith(suffix));
     }
 
     /**
      * Get the file type suffix.
      *
-     * @param file
-     * @return
+     * @param file file object
+     * @return file type suffix
      */
-    public static final FileSuffix getBy(File file)
+    public static FileSuffix getBy(File file)
     {
         String fileName=file.getName();
         if(EXCEL_XLSX.check(fileName)) return EXCEL_XLSX;

@@ -4,14 +4,35 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- Custom Properties -->
+    <properties>
+        <!-- Developer -->
+        <developer_url>https://github.com</developer_url>
+        <developer_name>ProteanBear</developer_name>
+        <developer_email>moru_1982@hotmail.com</developer_email>
+        <!-- Versions -->
+        <version_jdk>1.8</version_jdk>
+        <version_sonatype>1.6.8</version_sonatype>
+        <version_maven_release>2.5.3</version_maven_release>
+        <version_maven_complier>3.7.0</version_maven_complier>
+        <version_maven_gpg>1.6</version_maven_gpg>
+        <version_maven_source>3.0.1</version_maven_source>
+        <version_maven_javadoc>3.0.0</version_maven_javadoc>
+
+        <!-- Add -->
+        <version_poi>3.17</version_poi>
+        <version_junit>4.12</version_junit>
+        <version_jackson>2.9.1</version_jackson>
+    </properties>
+
     <!-- Project Information -->
     <groupId>xyz.proteanbear</groupId>
     <artifactId>PbPOITemplate</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.0-SNAPSHOT</version>
 
     <!-- For Maven -->
     <name>${project.groupId}:${project.artifactId}</name>
-    <url>https://github.com/ProteanBear/PbPOITemplate</url>
+    <url>${developer_url}/${developer_name}/${project.artifactId}</url>
     <description>The tools is created for easy use of Apache POI.</description>
 
     <!-- License -->
@@ -25,19 +46,20 @@
     <!-- Developer -->
     <developers>
         <developer>
-            <name>ProteanBear</name>
-            <email>moru_1982@hotmail.com</email>
+            <name>${developer_name}</name>
+            <email>${developer_email}</email>
             <roles>
                 <role>developer</role>
             </roles>
+            <timezone>+8</timezone>
         </developer>
     </developers>
 
     <!-- SCM -->
     <scm>
-        <connection>scm:git:https://github.com/ProteanBear/PbPOITemplate.git</connection>
-        <developerConnection>scm:git:https://github.com/ProteanBear/PbPOITemplate.git</developerConnection>
-        <url>https://github.com/ProteanBear/PbPOITemplate</url>
+        <connection>scm:git:${developer_url}/${developer_name}/${project.artifactId}.git</connection>
+        <developerConnection>scm:git:${developer_url}/${developer_name}/${project.artifactId}.git</developerConnection>
+        <url>${developer_url}/${developer_name}/${project.artifactId}</url>
         <tag>v${project.version}</tag>
     </scm>
 
@@ -54,42 +76,37 @@
         </repository>
     </distributionManagement>
 
-    <!-- -->
-    <properties>
-        <poi_version>3.17</poi_version>
-    </properties>
-
     <!-- dependencies -->
     <dependencies>
         <!-- poi -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>${poi_version}</version>
+            <version>${version_poi}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>${poi_version}</version>
+            <version>${version_poi}</version>
         </dependency>
 
         <!-- Test -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.12</version>
+            <version>${version_junit}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.1</version>
+            <version>${version_jackson}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.9.1</version>
+            <version>${version_jackson}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -100,9 +117,10 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>${version_maven_complier}</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>${version_jdk}</source>
+                    <target>${version_jdk}</target>
                 </configuration>
             </plugin>
         </plugins>
@@ -116,7 +134,7 @@
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.8</version>
+                        <version>${version_sonatype}</version>
                         <extensions>true</extensions>
                         <configuration>
                             <serverId>ossrh</serverId>
@@ -128,7 +146,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-release-plugin</artifactId>
-                        <version>2.5.3</version>
+                        <version>${version_maven_release}</version>
                         <configuration>
                             <autoVersionSubmodules>true</autoVersionSubmodules>
                             <useReleaseProfile>false</useReleaseProfile>
@@ -140,17 +158,17 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.7.0</version>
+                        <version>${version_maven_complier}</version>
                         <configuration>
-                            <source>1.8</source>
-                            <target>1.8</target>
+                            <source>${version_jdk}</source>
+                            <target>${version_jdk}</target>
                         </configuration>
                     </plugin>
                     <!-- sign -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
+                        <version>${version_maven_gpg}</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -165,7 +183,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.0.1</version>
+                        <version>${version_maven_source}</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -179,7 +197,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.0.0.M1</version>
+                        <version>${version_maven_javadoc}</version>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>

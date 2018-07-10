@@ -7,9 +7,6 @@ package xyz.proteanbear.template.utils;
  */
 public class Hex26Utils
 {
-    //hex
-    private static final int hex=26;
-
     //All numbers
     private static final String[] numbers=new String[]{"","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
 
@@ -17,8 +14,8 @@ public class Hex26Utils
      * Hex 10 to Hex 26<br/>
      * Number must be between 1 and 676
      *
-     * @param hex10
-     * @return
+     * @param hex10 the number of hex 10
+     * @return the number string of hex 26,eg.A,B,C
      */
     public static String from(int hex10)
     {
@@ -31,16 +28,5 @@ public class Hex26Utils
                 .append(remainder==0?numbers[26]:numbers[remainder]);
 
         return result.toString();
-    }
-
-    /**
-     * Hex 26 to Hex 10
-     *
-     * @param hex26
-     * @return
-     */
-    public static int toHex10(String hex26)
-    {
-        return 0;
     }
 }

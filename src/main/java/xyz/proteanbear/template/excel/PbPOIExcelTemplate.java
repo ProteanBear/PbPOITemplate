@@ -1,24 +1,20 @@
 package xyz.proteanbear.template.excel;
 
+import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.*;
 import xyz.proteanbear.template.annotation.PbPOIExcel;
 import xyz.proteanbear.template.annotation.PbPOIExcelTitle;
 import xyz.proteanbear.template.utils.ClassUtils;
 import xyz.proteanbear.template.utils.FileSuffix;
 import xyz.proteanbear.template.utils.Hex26Utils;
 import xyz.proteanbear.template.utils.StringUtils;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.*;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.ParseException;
@@ -45,7 +41,7 @@ public class PbPOIExcelTemplate
      * Read excel file and write to list of T class
      *
      * @param excelFile The file .xls or .xlsx
-     * @return
+     * @return the object list of `returnClass`
      */
     public List<?> readFrom(File excelFile,Class<?> returnClass)
             throws IOException, InvalidFormatException, NoSuchMethodException, IllegalAccessException,
@@ -54,17 +50,17 @@ public class PbPOIExcelTemplate
         //Load Excel File
         Workbook workbook=WorkbookFactory.create(excelFile);
 
+        //title->Annotation map
+        Map<String,Object> titleAnnotationMap=new HashMap<>();
         //Get returnClass title->setMethod map by annotation
-        Map<String,Method> titleMethodMap=ClassUtils.titleMapSetMethodBy(PbPOIExcelTitle.class,returnClass);
-        //Get resultClass title->Annotation map
-        Map<String,Object> titleAnnotationMap=ClassUtils.titleMapAnnotationBy(PbPOIExcelTitle.class,returnClass);
+        Map<String,Method> titleMethodMap=ClassUtils.titleMapSetMethodBy(PbPOIExcelTitle.class,returnClass,titleAnnotationMap);
 
         //Record index->title map
-        Map<String,String> indexTitleMap=new HashMap<String,String>();
+        Map<String,String> indexTitleMap=new HashMap<>();
 
         //All sheets
-        Sheet sheet=null;
-        Row row=null;
+        Sheet sheet;
+        Row row;
         List<Object> result=new ArrayList<>();
         int pageNum=workbook.getNumberOfSheets();
         for(int page=0;page<pageNum;page++)
@@ -243,16 +239,12 @@ public class PbPOIExcelTemplate
      *
      * @param data the specified data list.Multiple sets of data to generate multiple sheets.
      */
-    protected XSSFWorkbook writeToXLSX(List<?>... data) throws IOException
+    private XSSFWorkbook writeToXLSX(List<?>... data)
     {
         //Declare a workbook
         XSSFWorkbook workbook=new XSSFWorkbook();
 
         //Create the sheets
-        XSSFSheet sheet;
-        XSSFRow row;
-        XSSFCell cell;
-        Class curClass;
         PbPOIExcel pbPOIExcelAnnotation;
         Map<PbPOIExcelTitle,Method> getMethodMap;
         for(List<?> oneDataList : data)
@@ -260,13 +252,13 @@ public class PbPOIExcelTemplate
             if(oneDataList.isEmpty()) continue;
 
             //Get the class corresponding annotation
-            curClass=oneDataList.get(0).getClass();
+            Class curClass=oneDataList.get(0).getClass();
             pbPOIExcelAnnotation=oneDataList.get(0).getClass().getAnnotation(PbPOIExcel.class);
             if(pbPOIExcelAnnotation==null) continue;
 
             //Create a sheet
             String sheetTitle=pbPOIExcelAnnotation.sheetTitle();
-            sheet=StringUtils.isBlank(sheetTitle)?workbook.createSheet():workbook.createSheet(sheetTitle);
+            XSSFSheet sheet=StringUtils.isBlank(sheetTitle)?workbook.createSheet():workbook.createSheet(sheetTitle);
             int curRow=0, index=0;
 
             //Generate the table title line
@@ -274,10 +266,10 @@ public class PbPOIExcelTemplate
             {
                 getMethodMap=ClassUtils.titleMapGetMethodBy(PbPOIExcelTitle.class,curClass);
 
-                row=sheet.createRow(curRow++);
+                XSSFRow row=sheet.createRow(curRow++);
                 for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
                 {
-                    cell=row.createCell(index);
+                    XSSFCell cell=row.createCell(index);
                     set(cell,pbPOIExcelTitle.value(),pbPOIExcelTitle);
                     index++;
                 }
@@ -289,20 +281,19 @@ public class PbPOIExcelTemplate
             }
 
             //Generate the table content line
-            for(int i=0;i<oneDataList.size();i++)
+            for(Object anOneDataList : oneDataList)
             {
-                row=sheet.createRow(curRow++);
+                XSSFRow row=sheet.createRow(curRow++);
                 index=0;
-                Object oneData=oneDataList.get(i);
 
                 for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
                 {
-                    cell=row.createCell(index);
+                    XSSFCell cell=row.createCell(index);
                     try
                     {
                         set(
                                 cell,
-                                getMethodMap.get(pbPOIExcelTitle).invoke(oneData),
+                                getMethodMap.get(pbPOIExcelTitle).invoke(anOneDataList),
                                 pbPOIExcelTitle
                         );
                     }
@@ -324,7 +315,7 @@ public class PbPOIExcelTemplate
      *
      * @param data the specified data list.Multiple sets of data to generate multiple sheets.
      */
-    protected HSSFWorkbook writeToXLS(List<?>... data) throws IOException
+    private HSSFWorkbook writeToXLS(List<?>... data)
     {
         //Declare a workbook
         HSSFWorkbook workbook=new HSSFWorkbook();
@@ -370,11 +361,10 @@ public class PbPOIExcelTemplate
             }
 
             //Generate the table content line
-            for(int i=0;i<oneDataList.size();i++)
+            for(Object anOneDataList : oneDataList)
             {
                 row=sheet.createRow(curRow++);
                 index=0;
-                Object oneData=oneDataList.get(i);
 
                 for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
                 {
@@ -383,7 +373,7 @@ public class PbPOIExcelTemplate
                     {
                         set(
                                 cell,
-                                getMethodMap.get(pbPOIExcelTitle).invoke(oneData),
+                                getMethodMap.get(pbPOIExcelTitle).invoke(anOneDataList),
                                 pbPOIExcelTitle
                         );
                     }
@@ -407,7 +397,7 @@ public class PbPOIExcelTemplate
      * @param content         the content object
      * @param pbPOIExcelTitle the annotation
      */
-    protected void set(Cell cell,Object content,PbPOIExcelTitle pbPOIExcelTitle)
+    private void set(Cell cell,Object content,PbPOIExcelTitle pbPOIExcelTitle)
     {
         String textValue=null;
 
@@ -418,7 +408,7 @@ public class PbPOIExcelTemplate
         if(content instanceof Boolean)
         {
             cell.setCellType(CellType.BOOLEAN);
-            cell.setCellValue(((Boolean)content).booleanValue());
+            cell.setCellValue((Boolean)content);
         }
         //If the content object is Date
         else if(content instanceof Date)
@@ -446,7 +436,7 @@ public class PbPOIExcelTemplate
         //Other
         else
         {
-            textValue=content.toString();
+            textValue=content!=null?content.toString():null;
         }
 
         //If the content is a number or string

@@ -13,7 +13,7 @@ public class StringUtils
      * @param string the string.
      * @return If the string is blank,return true.
      */
-    public static final boolean isBlank(String string)
+    public static boolean isBlank(String string)
     {
         return (string==null || "".equals(string.trim()));
     }

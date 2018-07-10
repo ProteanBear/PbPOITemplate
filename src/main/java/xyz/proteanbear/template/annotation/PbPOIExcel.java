@@ -13,5 +13,5 @@ import java.lang.annotation.*;
 public @interface PbPOIExcel
 {
     //The title of the sheet
-    String sheetTitle() default "";
+    String sheetTitle() default "sheet";
 }

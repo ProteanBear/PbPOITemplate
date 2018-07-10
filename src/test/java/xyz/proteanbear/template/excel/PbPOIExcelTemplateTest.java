@@ -76,8 +76,8 @@ public class PbPOIExcelTemplateTest
         {
             ExcelTestBean excelTestBean=new ExcelTestBean();
             excelTestBean.setTitle("标题"+i);
-            excelTestBean.setCount(new Double(i));
-            excelTestBean.setAverage((new Double(i)).doubleValue()/10.0);
+            excelTestBean.setCount((double)i);
+            excelTestBean.setAverage((double)i/10.0);
             excelTestBean.setDateTime(new Date());
             writeData.add(excelTestBean);
         }
