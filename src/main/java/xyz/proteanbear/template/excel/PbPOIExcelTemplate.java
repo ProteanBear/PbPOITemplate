@@ -25,6 +25,7 @@ import java.util.regex.Pattern;
 
 /**
  * The tools is created for easy use of Apache POI.
+ * This tool is used for reading and writing in Excel.
  *
  * @author ProteanBear
  */
@@ -117,6 +118,7 @@ public class PbPOIExcelTemplate
                     PbPOIExcelTitle annotation=(PbPOIExcelTitle)titleAnnotationMap.get(indexTitleMap.get(index+""));
                     if(method==null) continue;
                     Object value=valueOf(row.getCell(index));
+                    if(value==null) continue;
 
                     //Date -> String
                     if(method.getParameterTypes()[0].isAssignableFrom(String.class))
