@@ -23,6 +23,9 @@ public class ExcelNoTitleTestBean
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm",timezone = "GMT+8")
     private Date dateTime;
 
+    @PbPOIExcelTitle("E")
+    private String description;
+
     public String getTitle()
     {
         return title;
@@ -61,5 +64,15 @@ public class ExcelNoTitleTestBean
     public void setDateTime(Date dateTime)
     {
         this.dateTime=dateTime;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public void setDescription(String description)
+    {
+        this.description=description;
     }
 }
