@@ -195,6 +195,7 @@ public class PbPOIExcelTemplate
     public Object valueOf(Cell cell)
     {
         Object result=null;
+        if(cell==null) return null;
 
         //Get cell's type
         CellType type=cell.getCellTypeEnum();

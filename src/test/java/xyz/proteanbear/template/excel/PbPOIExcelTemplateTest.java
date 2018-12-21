@@ -25,10 +25,10 @@ public class PbPOIExcelTemplateTest
     {
         try
         {
-            File excelFile=new File(getClass().getResource("/1.xlsx").getPath());
+            File excelFile=new File(getClass().getResource("/normalWithTitle.xlsx").getPath());
             PbPOIExcelTemplate excelTemplate=new PbPOIExcelTemplate();
-            List<ReportInfo> list=(List<ReportInfo>)excelTemplate
-                    .readFrom(excelFile,ReportInfo.class);
+            List<ExcelTestBean> list=(List<ExcelTestBean>)excelTemplate
+                    .readFrom(excelFile,ExcelTestBean.class);
 
             Assert.assertTrue("读取Excel错误！",(list!=null&&!list.isEmpty()));
             ObjectMapper objectMapper=new ObjectMapper();
