@@ -1,4 +1,4 @@
-package xyz.proteanbear.template.excel;
+package xyz.proteanbear.template;
 
 import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;

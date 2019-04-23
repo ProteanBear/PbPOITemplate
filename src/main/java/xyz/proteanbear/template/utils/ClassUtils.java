@@ -4,6 +4,7 @@ import xyz.proteanbear.template.annotation.PbPOIExcelTitle;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -55,8 +56,8 @@ public class ClassUtils
      * @throws InvocationTargetException Invocation target
      * @throws IllegalAccessException    Illegal access
      */
-    public static Map<String,Method> titleMapSetMethodBy(Class<PbPOIExcelTitle> annotationClass,Class ofClass,
-                                                         Map<String,Object> titleMapAnnotation)
+    public static <T extends Annotation> Map<String,Method> titleMapSetMethodBy(Class<T> annotationClass,Class ofClass,
+                                                                                Map<String,Object> titleMapAnnotation)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
     {
         Map<String,Method> result=new LinkedHashMap<>();
@@ -84,6 +85,62 @@ public class ClassUtils
         }
 
         return result;
+    }
+
+    /**
+     * generate title — getMethod map by annotation
+     *
+     * @param annotationClass the annotation class
+     * @param data            data objects with template variables declared by annotations
+     * @return the hash map for the annotation value() to the data content
+     * @throws NoSuchMethodException     No such method
+     * @throws InvocationTargetException Invocation target
+     * @throws IllegalAccessException    Illegal access
+     */
+    public static <T extends Annotation> Map<String,Object> dataMapBy(Class<T> annotationClass,Object data)
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
+    {
+        Map<String,Object> result=new HashMap<>();
+
+        //All fields
+        Class dataClass=data.getClass();
+        Field[] fields=dataClass.getDeclaredFields();
+        T annotation;
+        Method valueMethod, getMethod;
+        String method;
+        for(Field field : fields)
+        {
+            //Get annotation
+            annotation=field.getAnnotation(annotationClass);
+
+            //Annotation is null
+            if(annotation==null) continue;
+            //Annotation's value method
+            valueMethod=annotationClass.getMethod("value");
+            //method
+            method=(String)valueMethod.invoke(annotation);
+            //field's getter method
+            getMethod=methodGetterOf(field,dataClass);
+
+            result.put(method,getMethod.invoke(data));
+        }
+
+        return result;
+    }
+
+    /**
+     * Get setter method of field
+     *
+     * @param fieldName The class field name string
+     * @param ofClass   The class
+     * @return The field's getter method
+     * @throws NoSuchMethodException No such method
+     * @throws NoSuchFieldException  No such field
+     */
+    public static Method methodGetterOf(String fieldName,Class ofClass)
+            throws NoSuchMethodException, NoSuchFieldException
+    {
+        return methodGetterOf(ofClass.getDeclaredField(fieldName),ofClass);
     }
 
     /**

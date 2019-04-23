@@ -1,8 +1,8 @@
 package xyz.proteanbear.template.excel;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import xyz.proteanbear.template.PbPOIExcelTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -30,7 +30,6 @@ public class PbPOIExcelTemplateTest
             List<ExcelTestBean> list=(List<ExcelTestBean>)excelTemplate
                     .readFrom(excelFile,ExcelTestBean.class);
 
-            Assert.assertTrue("读取Excel错误！",(list!=null&&!list.isEmpty()));
             ObjectMapper objectMapper=new ObjectMapper();
             System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(list));
         }
@@ -54,7 +53,6 @@ public class PbPOIExcelTemplateTest
                     .setTitleLine(-1)
                     .readFrom(excelFile,ExcelNoTitleTestBean.class);
 
-            Assert.assertTrue("读取Excel错误！",(list!=null&&!list.isEmpty()));
             ObjectMapper objectMapper=new ObjectMapper();
             System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(list));
         }

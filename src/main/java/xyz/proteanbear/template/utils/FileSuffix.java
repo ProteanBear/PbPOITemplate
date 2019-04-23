@@ -10,7 +10,9 @@ import java.io.File;
 public enum FileSuffix
 {
     EXCEL_XLSX(".xlsx"),
-    EXCEL_XLS(".xls");
+    EXCEL_XLS(".xls"),
+    WORD_DOC(".doc"),
+    WORD_DOCX(".docx");
 
     /**
      *
@@ -45,6 +47,8 @@ public enum FileSuffix
         String fileName=file.getName();
         if(EXCEL_XLSX.check(fileName)) return EXCEL_XLSX;
         if(EXCEL_XLS.check(fileName)) return EXCEL_XLS;
+        if(WORD_DOC.check(fileName)) return WORD_DOC;
+        if(WORD_DOCX.check(fileName)) return WORD_DOCX;
         return null;
     }
 }
