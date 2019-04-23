@@ -198,7 +198,7 @@ public class PbPOIExcelTemplate
         if(cell==null) return null;
 
         //Get cell's type
-        CellType type=cell.getCellTypeEnum();
+        CellType type=cell.getCellType();
         //handle different type
         switch(type)
         {
@@ -425,13 +425,11 @@ public class PbPOIExcelTemplate
         //If the content object is boolean
         if(content instanceof Boolean)
         {
-            cell.setCellType(CellType.BOOLEAN);
             cell.setCellValue((Boolean)content);
         }
         //If the content object is Date
         else if(content instanceof Date)
         {
-            cell.setCellType(CellType.NUMERIC);
             cell.setCellValue(((Date)content));
 
             Workbook workbook=cell.getSheet().getWorkbook();
@@ -465,13 +463,11 @@ public class PbPOIExcelTemplate
             Matcher matcher=p.matcher(textValue);
             if(matcher.matches())
             {
-                cell.setCellType(CellType.NUMERIC);
                 cell.setCellValue(Double.parseDouble(textValue));
             }
             //If the content is a string
             else
             {
-                cell.setCellType(CellType.STRING);
                 XSSFRichTextString richString=new XSSFRichTextString(
                         textValue);
                 cell.setCellValue(richString);
