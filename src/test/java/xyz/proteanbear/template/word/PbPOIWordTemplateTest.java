@@ -14,11 +14,11 @@ public class PbPOIWordTemplateTest
     @Test
     public void writeWordFile()
     {
-        File template=new File(getClass().getResource("/").getPath(),"wordTemplate.docx");
-
-        PbPOIWordTemplate wordTemplate=new PbPOIWordTemplate();
         try
         {
+            File template=new File(getClass().getResource("/").toURI().getPath(),"wordTemplate.docx");
+
+            PbPOIWordTemplate wordTemplate=new PbPOIWordTemplate();
             WordTestDataBean testDataBean=new WordTestDataBean();
             testDataBean.setCaseNumber("2019-A2222");
             testDataBean.setName("高新医院");
@@ -74,7 +74,7 @@ public class PbPOIWordTemplateTest
             wordTemplate.writeTo(
                     template,
                     FileSuffix.WORD_DOCX,
-                    new FileOutputStream(new File(getClass().getResource("/").getPath(),"wordTest.docx")),
+                    new FileOutputStream(new File(getClass().getResource("/").toURI().getPath(),"wordTest.docx")),
                     testDataBean);
         }
         catch(Exception e)

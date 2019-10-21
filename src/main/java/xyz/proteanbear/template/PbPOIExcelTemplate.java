@@ -115,21 +115,13 @@ public class PbPOIExcelTemplate
                     Method method=titleMethodMap.get(indexTitleMap.get(index+""));
                     PbPOIExcelTitle annotation=(PbPOIExcelTitle)titleAnnotationMap.get(indexTitleMap.get(index+""));
                     if(method==null) continue;
-                    Object value=valueOf(row.getCell(index));
+                    Object value=transform(
+                            valueOf(row.getCell(index)),
+                            method.getParameterTypes()[0],
+                            annotation
+                    );
                     if(value==null) continue;
 
-                    //Date -> String
-                    if(method.getParameterTypes()[0].isAssignableFrom(String.class))
-                    {
-                        value=(value instanceof Date)?(new SimpleDateFormat(annotation.dateFormat())
-                                .format(value)):(value+"");
-                    }
-                    //String -> Date
-                    if(method.getParameterTypes()[0].isAssignableFrom(Date.class))
-                    {
-                        value=(value instanceof String)?(new SimpleDateFormat(annotation.dateFormat())
-                                .parse(value+"")):value;
-                    }
                     method.invoke(object,value);
                 }
                 //Insert into list result.
@@ -302,6 +294,41 @@ public class PbPOIExcelTemplate
         }
 
         return result;
+    }
+
+    /**
+     * Transform value to target class,and handle exceptions
+     * @param value value object
+     * @param toClass target class
+     * @param annotation annotation
+     * @param <T> target class
+     * @return value transformed
+     */
+    @SuppressWarnings("unchecked")
+    private <T> T transform(Object value,Class<T> toClass,PbPOIExcelTitle annotation) throws ParseException {
+        //value is null
+        if(value==null) return null;
+        //Date -> String
+        if(toClass.isAssignableFrom(String.class))
+        {
+            return (T)((value instanceof Date)
+                    ?(new SimpleDateFormat(annotation.dateFormat()).format(value))
+                    :(String.valueOf(value)));
+        }
+        //String -> Date
+        if(toClass.isAssignableFrom(Date.class))
+        {
+            return (T)((value instanceof String)
+                    ?(new SimpleDateFormat(annotation.dateFormat()).parse(String.valueOf(value)))
+                    :value);
+        }
+        //string reading from excel is blank
+        if(!toClass.isAssignableFrom(String.class)
+                &&"".equals(value)){
+            return null;
+        }
+
+        return (T)value;
     }
 
     /**
