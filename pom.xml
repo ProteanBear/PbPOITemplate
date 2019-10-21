@@ -20,15 +20,15 @@
         <version_maven_javadoc>3.0.0</version_maven_javadoc>
 
         <!-- Add -->
-        <version_poi>4.1.0</version_poi>
-        <version_junit>5.4.2</version_junit>
-        <version_jackson>2.9.8</version_jackson>
+        <version_poi>4.1.1</version_poi>
+        <version_junit>5.5.2</version_junit>
+        <version_jackson>2.10.0</version_jackson>
     </properties>
 
     <!-- Project Information -->
     <groupId>xyz.proteanbear</groupId>
     <artifactId>PbPOITemplate</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.1-SNAPSHOT</version>
 
     <!-- For Maven -->
     <name>${project.groupId}:${project.artifactId}</name>

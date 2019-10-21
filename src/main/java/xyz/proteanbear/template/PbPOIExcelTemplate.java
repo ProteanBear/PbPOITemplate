@@ -1,9 +1,7 @@
 package xyz.proteanbear.template;
 
-import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.*;
 import xyz.proteanbear.template.annotation.PbPOIExcel;
 import xyz.proteanbear.template.annotation.PbPOIExcelTitle;
 import xyz.proteanbear.template.utils.ClassUtils;
@@ -174,16 +172,82 @@ public class PbPOIExcelTemplate
      */
     public void writeTo(FileSuffix fileSuffix,OutputStream outputStream,List<?>... data) throws IOException
     {
+        //Declare a workbook
+        Workbook workbook;
         switch(fileSuffix)
         {
             case EXCEL_XLSX:
-                writeToXLSX(data).write(outputStream);
+                workbook=WorkbookFactory.create(true);
                 break;
             case EXCEL_XLS:
-                writeToXLS(data).write(outputStream);
-                break;
             default:
+                workbook=WorkbookFactory.create(false);
         }
+
+        //Create the sheets
+        PbPOIExcel pbPOIExcelAnnotation;
+        Map<PbPOIExcelTitle,Method> getMethodMap;
+        for(List<?> oneDataList : data)
+        {
+            if(oneDataList.isEmpty()) continue;
+
+            //Get the class corresponding annotation
+            Class curClass=oneDataList.get(0).getClass();
+            pbPOIExcelAnnotation=oneDataList.get(0).getClass().getAnnotation(PbPOIExcel.class);
+            if(pbPOIExcelAnnotation==null) continue;
+
+            //Create a sheet
+            String sheetTitle=pbPOIExcelAnnotation.sheetTitle();
+            Sheet sheet=StringUtils.isBlank(sheetTitle)?workbook.createSheet():workbook.createSheet(sheetTitle);
+            int curRow=0, index=0;
+
+            //Generate the table title line
+            try
+            {
+                getMethodMap=ClassUtils.titleMapGetMethodBy(PbPOIExcelTitle.class,curClass);
+
+                Row row=sheet.createRow(curRow++);
+                for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
+                {
+                    Cell cell=row.createCell(index);
+                    set(cell,pbPOIExcelTitle.value(),pbPOIExcelTitle);
+                    index++;
+                }
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+                continue;
+            }
+
+            //Generate the table content line
+            for(Object anOneDataList : oneDataList)
+            {
+                Row row=sheet.createRow(curRow++);
+                index=0;
+
+                for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
+                {
+                    Cell cell=row.createCell(index);
+                    try
+                    {
+                        set(
+                                cell,
+                                getMethodMap.get(pbPOIExcelTitle).invoke(anOneDataList),
+                                pbPOIExcelTitle
+                        );
+                    }
+                    catch(Exception e)
+                    {
+                        e.printStackTrace();
+                        set(cell,"",pbPOIExcelTitle);
+                    }
+                    index++;
+                }
+            }
+        }
+
+        workbook.write(outputStream);
     }
 
     /**
@@ -253,162 +317,6 @@ public class PbPOIExcelTemplate
     }
 
     /**
-     * Generate the excel content by the data.
-     *
-     * @param data the specified data list.Multiple sets of data to generate multiple sheets.
-     */
-    private XSSFWorkbook writeToXLSX(List<?>... data)
-    {
-        //Declare a workbook
-        XSSFWorkbook workbook=new XSSFWorkbook();
-
-        //Create the sheets
-        PbPOIExcel pbPOIExcelAnnotation;
-        Map<PbPOIExcelTitle,Method> getMethodMap;
-        for(List<?> oneDataList : data)
-        {
-            if(oneDataList.isEmpty()) continue;
-
-            //Get the class corresponding annotation
-            Class curClass=oneDataList.get(0).getClass();
-            pbPOIExcelAnnotation=oneDataList.get(0).getClass().getAnnotation(PbPOIExcel.class);
-            if(pbPOIExcelAnnotation==null) continue;
-
-            //Create a sheet
-            String sheetTitle=pbPOIExcelAnnotation.sheetTitle();
-            XSSFSheet sheet=StringUtils.isBlank(sheetTitle)?workbook.createSheet():workbook.createSheet(sheetTitle);
-            int curRow=0, index=0;
-
-            //Generate the table title line
-            try
-            {
-                getMethodMap=ClassUtils.titleMapGetMethodBy(PbPOIExcelTitle.class,curClass);
-
-                XSSFRow row=sheet.createRow(curRow++);
-                for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
-                {
-                    XSSFCell cell=row.createCell(index);
-                    set(cell,pbPOIExcelTitle.value(),pbPOIExcelTitle);
-                    index++;
-                }
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                continue;
-            }
-
-            //Generate the table content line
-            for(Object anOneDataList : oneDataList)
-            {
-                XSSFRow row=sheet.createRow(curRow++);
-                index=0;
-
-                for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
-                {
-                    XSSFCell cell=row.createCell(index);
-                    try
-                    {
-                        set(
-                                cell,
-                                getMethodMap.get(pbPOIExcelTitle).invoke(anOneDataList),
-                                pbPOIExcelTitle
-                        );
-                    }
-                    catch(Exception e)
-                    {
-                        e.printStackTrace();
-                        set(cell,"",pbPOIExcelTitle);
-                    }
-                    index++;
-                }
-            }
-        }
-
-        return workbook;
-    }
-
-    /**
-     * Generate the excel content by the data.
-     *
-     * @param data the specified data list.Multiple sets of data to generate multiple sheets.
-     */
-    private HSSFWorkbook writeToXLS(List<?>... data)
-    {
-        //Declare a workbook
-        HSSFWorkbook workbook=new HSSFWorkbook();
-
-        //Create the sheets
-        HSSFSheet sheet;
-        HSSFRow row;
-        HSSFCell cell;
-        Class curClass;
-        PbPOIExcel pbPOIExcelAnnotation;
-        Map<PbPOIExcelTitle,Method> getMethodMap;
-        for(List<?> oneDataList : data)
-        {
-            if(oneDataList.isEmpty()) continue;
-
-            //Get the class corresponding annotation
-            curClass=oneDataList.get(0).getClass();
-            pbPOIExcelAnnotation=oneDataList.get(0).getClass().getAnnotation(PbPOIExcel.class);
-            if(pbPOIExcelAnnotation==null) continue;
-
-            //Create a sheet
-            String sheetTitle=pbPOIExcelAnnotation.sheetTitle();
-            sheet=StringUtils.isBlank(sheetTitle)?workbook.createSheet():workbook.createSheet(sheetTitle);
-            int curRow=0, index=0;
-
-            //Generate the table title line
-            try
-            {
-                getMethodMap=ClassUtils.titleMapGetMethodBy(PbPOIExcelTitle.class,curClass);
-
-                row=sheet.createRow(curRow++);
-                for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
-                {
-                    cell=row.createCell(index);
-                    set(cell,pbPOIExcelTitle.value(),pbPOIExcelTitle);
-                    index++;
-                }
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                continue;
-            }
-
-            //Generate the table content line
-            for(Object anOneDataList : oneDataList)
-            {
-                row=sheet.createRow(curRow++);
-                index=0;
-
-                for(PbPOIExcelTitle pbPOIExcelTitle : getMethodMap.keySet())
-                {
-                    cell=row.createCell(index);
-                    try
-                    {
-                        set(
-                                cell,
-                                getMethodMap.get(pbPOIExcelTitle).invoke(anOneDataList),
-                                pbPOIExcelTitle
-                        );
-                    }
-                    catch(Exception e)
-                    {
-                        e.printStackTrace();
-                        set(cell,"",pbPOIExcelTitle);
-                    }
-                    index++;
-                }
-            }
-        }
-
-        return workbook;
-    }
-
-    /**
      * Set content to cells, based on the type of content
      *
      * @param cell            the cell
@@ -468,9 +376,7 @@ public class PbPOIExcelTemplate
             //If the content is a string
             else
             {
-                XSSFRichTextString richString=new XSSFRichTextString(
-                        textValue);
-                cell.setCellValue(richString);
+                cell.setCellValue(textValue);
             }
         }
     }
