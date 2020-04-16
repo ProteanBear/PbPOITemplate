@@ -156,12 +156,11 @@ public class ClassUtils
     private static Method methodGetterOf(Field field, Class ofClass) throws NoSuchMethodException
     {
         String name = field.getName();
-        return ofClass.getMethod(
-                "get" +
-                        String.valueOf(name.charAt(0))
-                              .toUpperCase() +
-                        (name.length() > 1 ? name.substring(1) : "")
-        );
+        String methodName="get" +
+                String.valueOf(name.charAt(0))
+                      .toUpperCase() +
+                (name.length() > 1 ? name.substring(1) : "");
+        return ofClass.getMethod(methodName);
     }
 
     /**
@@ -175,11 +174,10 @@ public class ClassUtils
     private static Method methodSetterOf(Field field, Class ofClass) throws NoSuchMethodException
     {
         String name = field.getName();
-        return ofClass.getMethod(
-                "set" +
-                        String.valueOf(name.charAt(0))
-                              .toUpperCase() +
-                        (name.length() > 1 ? name.substring(1) : "")
-        );
+        String methodName="set" +
+                String.valueOf(name.charAt(0))
+                      .toUpperCase() +
+                (name.length() > 1 ? name.substring(1) : "");
+        return ofClass.getMethod(methodName,field.getType());
     }
 }

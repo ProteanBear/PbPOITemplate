@@ -3,6 +3,7 @@ package xyz.proteanbear.template.excel;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import xyz.proteanbear.template.PbPOIExcelTemplate;
+import xyz.proteanbear.template.exception.FileSuffixNotSupportException;
 
 import java.io.File;
 import java.io.IOException;
@@ -88,7 +89,7 @@ public class PbPOIExcelTemplateTest
             PbPOIExcelTemplate excelTemplate=new PbPOIExcelTemplate();
             excelTemplate.writeTo(excelFile,writeData);
         }
-        catch(IOException | URISyntaxException e)
+        catch(IOException | URISyntaxException | FileSuffixNotSupportException e)
         {
             e.printStackTrace();
         }
