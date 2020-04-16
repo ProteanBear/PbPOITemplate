@@ -23,7 +23,7 @@ public class ClassUtils
      * @return the hash map for the annotation object to the method
      * @throws NoSuchMethodException No such method
      */
-    public static <T extends Annotation> Map<T, Method> titleMapGetMethodBy(Class<T> annotationClass, Class ofClass)
+    public static <T extends Annotation,O> Map<T, Method> titleMapGetMethodBy(Class<T> annotationClass, Class<O> ofClass)
             throws NoSuchMethodException
     {
         Map<T, Method> result = new LinkedHashMap<>();
@@ -56,8 +56,8 @@ public class ClassUtils
      * @throws InvocationTargetException Invocation target
      * @throws IllegalAccessException    Illegal access
      */
-    public static <T extends Annotation> Map<String, Method> titleMapSetMethodBy(
-            Class<T> annotationClass, Class ofClass,
+    public static <T extends Annotation,O> Map<String, Method> titleMapSetMethodBy(
+            Class<T> annotationClass, Class<O> ofClass,
             Map<String, Object> titleMapAnnotation
     )
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
@@ -105,7 +105,7 @@ public class ClassUtils
         Map<String, Object> result = new HashMap<>();
 
         //All fields
-        Class dataClass = data.getClass();
+        Class<?> dataClass = data.getClass();
         Field[] fields = dataClass.getDeclaredFields();
         T annotation;
         Method valueMethod, getMethod;
@@ -139,7 +139,7 @@ public class ClassUtils
      * @throws NoSuchMethodException No such method
      * @throws NoSuchFieldException  No such field
      */
-    public static Method methodGetterOf(String fieldName, Class ofClass)
+    public static <O> Method methodGetterOf(String fieldName, Class<O> ofClass)
             throws NoSuchMethodException, NoSuchFieldException
     {
         return methodGetterOf(ofClass.getDeclaredField(fieldName), ofClass);
@@ -153,7 +153,7 @@ public class ClassUtils
      * @return The field's getter method
      * @throws NoSuchMethodException No such method
      */
-    private static Method methodGetterOf(Field field, Class ofClass) throws NoSuchMethodException
+    private static <O> Method methodGetterOf(Field field, Class<O> ofClass) throws NoSuchMethodException
     {
         String name = field.getName();
         String methodName="get" +
@@ -171,7 +171,7 @@ public class ClassUtils
      * @return The field's getter method
      * @throws NoSuchMethodException No such method
      */
-    private static Method methodSetterOf(Field field, Class ofClass) throws NoSuchMethodException
+    private static <O> Method methodSetterOf(Field field, Class<O> ofClass) throws NoSuchMethodException
     {
         String name = field.getName();
         String methodName="set" +

@@ -49,7 +49,7 @@ public class PbPOIExcelTemplate
      * @throws InstantiationException    instantiation error
      * @throws ParseException            parse error
      */
-    public List<?> readFrom(File excelFile, Class<?> returnClass)
+    public <T> List<T> readFrom(File excelFile, Class<T> returnClass)
             throws IOException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException, InstantiationException, ParseException
     {
@@ -68,7 +68,7 @@ public class PbPOIExcelTemplate
         //All sheets
         Sheet sheet;
         Row row;
-        List<Object> result = new ArrayList<>();
+        List<T> result = new ArrayList<>();
         int pageNum = workbook.getNumberOfSheets();
         for (int page = 0; page < pageNum; page++)
         {
@@ -106,7 +106,7 @@ public class PbPOIExcelTemplate
                 }
 
                 //Create new tClass Object instance
-                Object object = returnClass.getDeclaredConstructor()
+                T object = returnClass.getDeclaredConstructor()
                                            .newInstance();
                 //All cells include null cell
                 for (int index = 0; index < colNum; index++)
@@ -186,7 +186,7 @@ public class PbPOIExcelTemplate
             if (oneDataList.isEmpty()) continue;
 
             //Get the class corresponding annotation
-            Class curClass = oneDataList.get(0)
+            Class<?> curClass = oneDataList.get(0)
                                         .getClass();
             pbPOIExcelAnnotation = oneDataList.get(0)
                                               .getClass()
@@ -247,7 +247,7 @@ public class PbPOIExcelTemplate
             // auto resize column
             for (int i = 0; i < getMethodMap.size(); i++)
             {
-                sheet.autoSizeColumn(i,true);
+                sheet.autoSizeColumn(i, true);
             }
         }
 
