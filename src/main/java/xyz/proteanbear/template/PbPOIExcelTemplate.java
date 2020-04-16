@@ -243,6 +243,12 @@ public class PbPOIExcelTemplate
                     index++;
                 }
             }
+
+            // auto resize column
+            for (int i = 0; i < getMethodMap.size(); i++)
+            {
+                sheet.autoSizeColumn(i,true);
+            }
         }
 
         workbook.write(outputStream);

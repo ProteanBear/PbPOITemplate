@@ -79,7 +79,7 @@ public class PbPOIExcelTemplateTest
             for(int i=0;i<5;i++)
             {
                 ExcelTestBean excelTestBean=new ExcelTestBean();
-                excelTestBean.setTitle("标题"+i);
+                excelTestBean.setTitle("标题内容"+i+"（"+(i%2==1?"我长点":"短")+"）");
                 excelTestBean.setCount((double)i);
                 excelTestBean.setAverage((double)i/10.0);
                 excelTestBean.setDateTime(new Date());
