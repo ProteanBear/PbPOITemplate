@@ -57,7 +57,6 @@ public class PbPOIExcelTemplateTest
                                                 .getPath());
             PbPOIExcelTemplate excelTemplate = new PbPOIExcelTemplate();
             List<ExcelNoTitleTestBean> list = excelTemplate
-                    .setTitleLine(-1)
                     .readFrom(excelFile, ExcelNoTitleTestBean.class);
 
             ObjectMapper objectMapper = new ObjectMapper();

@@ -56,6 +56,10 @@ public class PbPOIExcelTemplate
         //Load Excel File
         Workbook workbook = WorkbookFactory.create(excelFile);
 
+        //set title line setting in the annotation
+        PbPOIExcel sheetAnnotation = returnClass.getAnnotation(PbPOIExcel.class);
+        if (sheetAnnotation != null) setTitleLine(sheetAnnotation.titleLine());
+
         //title->Annotation map
         Map<String, Object> titleAnnotationMap = new HashMap<>();
         //Get returnClass title->setMethod map by annotation
@@ -107,7 +111,7 @@ public class PbPOIExcelTemplate
 
                 //Create new tClass Object instance
                 T object = returnClass.getDeclaredConstructor()
-                                           .newInstance();
+                                      .newInstance();
                 //All cells include null cell
                 for (int index = 0; index < colNum; index++)
                 {
@@ -187,7 +191,7 @@ public class PbPOIExcelTemplate
 
             //Get the class corresponding annotation
             Class<?> curClass = oneDataList.get(0)
-                                        .getClass();
+                                           .getClass();
             pbPOIExcelAnnotation = oneDataList.get(0)
                                               .getClass()
                                               .getAnnotation(PbPOIExcel.class);
