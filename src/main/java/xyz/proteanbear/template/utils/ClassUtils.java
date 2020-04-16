@@ -1,9 +1,9 @@
 package xyz.proteanbear.template.utils;
 
-import xyz.proteanbear.template.annotation.PbPOIExcelTitle;
-
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -23,23 +23,23 @@ public class ClassUtils
      * @return the hash map for the annotation object to the method
      * @throws NoSuchMethodException No such method
      */
-    public static <T extends Annotation> Map<T,Method> titleMapGetMethodBy(Class<T> annotationClass,Class ofClass)
+    public static <T extends Annotation> Map<T, Method> titleMapGetMethodBy(Class<T> annotationClass, Class ofClass)
             throws NoSuchMethodException
     {
-        Map<T,Method> result=new LinkedHashMap<>();
+        Map<T, Method> result = new LinkedHashMap<>();
 
         //All fields
-        Field[] fields=ofClass.getDeclaredFields();
+        Field[] fields = ofClass.getDeclaredFields();
         T annotation;
-        for(Field field : fields)
+        for (Field field : fields)
         {
             //Get annotation
-            annotation=field.getAnnotation(annotationClass);
+            annotation = field.getAnnotation(annotationClass);
 
             //Annotation is null
-            if(annotation==null) continue;
+            if (annotation == null) continue;
             //field's setter method
-            result.put(annotation,methodGetterOf(field,ofClass));
+            result.put(annotation, methodGetterOf(field, ofClass));
         }
 
         return result;
@@ -56,32 +56,34 @@ public class ClassUtils
      * @throws InvocationTargetException Invocation target
      * @throws IllegalAccessException    Illegal access
      */
-    public static <T extends Annotation> Map<String,Method> titleMapSetMethodBy(Class<T> annotationClass,Class ofClass,
-                                                                                Map<String,Object> titleMapAnnotation)
+    public static <T extends Annotation> Map<String, Method> titleMapSetMethodBy(
+            Class<T> annotationClass, Class ofClass,
+            Map<String, Object> titleMapAnnotation
+    )
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
     {
-        Map<String,Method> result=new LinkedHashMap<>();
+        Map<String, Method> result = new LinkedHashMap<>();
 
         //All fields
-        Field[] fields=ofClass.getDeclaredFields();
+        Field[] fields = ofClass.getDeclaredFields();
         Method valueMethod;
         Object annotation;
         String method;
-        for(Field field : fields)
+        for (Field field : fields)
         {
             //Get annotation
-            annotation=field.getAnnotation(annotationClass);
+            annotation = field.getAnnotation(annotationClass);
 
             //Annotation is null
-            if(annotation==null) continue;
+            if (annotation == null) continue;
             //Annotation's value method
-            valueMethod=annotationClass.getMethod("value");
+            valueMethod = annotationClass.getMethod("value");
             //method
-            method=(String)valueMethod.invoke(annotation);
+            method = (String) valueMethod.invoke(annotation);
             //field's setter method
-            result.put(method,methodSetterOf(field,ofClass));
+            result.put(method, methodSetterOf(field, ofClass));
             //annotation
-            titleMapAnnotation.put(method,annotation);
+            titleMapAnnotation.put(method, annotation);
         }
 
         return result;
@@ -97,32 +99,32 @@ public class ClassUtils
      * @throws InvocationTargetException Invocation target
      * @throws IllegalAccessException    Illegal access
      */
-    public static <T extends Annotation> Map<String,Object> dataMapBy(Class<T> annotationClass,Object data)
+    public static <T extends Annotation> Map<String, Object> dataMapBy(Class<T> annotationClass, Object data)
             throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
     {
-        Map<String,Object> result=new HashMap<>();
+        Map<String, Object> result = new HashMap<>();
 
         //All fields
-        Class dataClass=data.getClass();
-        Field[] fields=dataClass.getDeclaredFields();
+        Class dataClass = data.getClass();
+        Field[] fields = dataClass.getDeclaredFields();
         T annotation;
         Method valueMethod, getMethod;
         String method;
-        for(Field field : fields)
+        for (Field field : fields)
         {
             //Get annotation
-            annotation=field.getAnnotation(annotationClass);
+            annotation = field.getAnnotation(annotationClass);
 
             //Annotation is null
-            if(annotation==null) continue;
+            if (annotation == null) continue;
             //Annotation's value method
-            valueMethod=annotationClass.getMethod("value");
+            valueMethod = annotationClass.getMethod("value");
             //method
-            method=(String)valueMethod.invoke(annotation);
+            method = (String) valueMethod.invoke(annotation);
             //field's getter method
-            getMethod=methodGetterOf(field,dataClass);
+            getMethod = methodGetterOf(field, dataClass);
 
-            result.put(method,getMethod.invoke(data));
+            result.put(method, getMethod.invoke(data));
         }
 
         return result;
@@ -137,10 +139,10 @@ public class ClassUtils
      * @throws NoSuchMethodException No such method
      * @throws NoSuchFieldException  No such field
      */
-    public static Method methodGetterOf(String fieldName,Class ofClass)
+    public static Method methodGetterOf(String fieldName, Class ofClass)
             throws NoSuchMethodException, NoSuchFieldException
     {
-        return methodGetterOf(ofClass.getDeclaredField(fieldName),ofClass);
+        return methodGetterOf(ofClass.getDeclaredField(fieldName), ofClass);
     }
 
     /**
@@ -151,12 +153,15 @@ public class ClassUtils
      * @return The field's getter method
      * @throws NoSuchMethodException No such method
      */
-    private static Method methodGetterOf(Field field,Class ofClass) throws NoSuchMethodException
+    private static Method methodGetterOf(Field field, Class ofClass) throws NoSuchMethodException
     {
-        String name=field.getName();
-        String getMethodName="get"+name.substring(0,1).toUpperCase()+
-                name.substring(1);
-        return ofClass.getMethod(getMethodName);
+        String name = field.getName();
+        return ofClass.getMethod(
+                "get" +
+                        String.valueOf(name.charAt(0))
+                              .toUpperCase() +
+                        (name.length() > 1 ? name.substring(1) : "")
+        );
     }
 
     /**
@@ -167,11 +172,14 @@ public class ClassUtils
      * @return The field's getter method
      * @throws NoSuchMethodException No such method
      */
-    private static Method methodSetterOf(Field field,Class ofClass) throws NoSuchMethodException
+    private static Method methodSetterOf(Field field, Class ofClass) throws NoSuchMethodException
     {
-        String name=field.getName();
-        String setMethodName="set"+name.substring(0,1).toUpperCase()+
-                name.substring(1);
-        return ofClass.getMethod(setMethodName,field.getType());
+        String name = field.getName();
+        return ofClass.getMethod(
+                "set" +
+                        String.valueOf(name.charAt(0))
+                              .toUpperCase() +
+                        (name.length() > 1 ? name.substring(1) : "")
+        );
     }
 }
