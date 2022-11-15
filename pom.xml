@@ -22,7 +22,7 @@
         <!-- Add -->
         <version_poi>4.1.1</version_poi>
         <version_junit>5.5.2</version_junit>
-        <version_jackson>2.10.0</version_jackson>
+        <version_jackson>2.12.7.1</version_jackson>
     </properties>
 
     <!-- Project Information -->
