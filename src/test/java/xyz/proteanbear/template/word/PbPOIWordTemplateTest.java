@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class PbPOIWordTemplateTest
 {
@@ -16,7 +17,8 @@ public class PbPOIWordTemplateTest
     {
         try
         {
-            File template=new File(getClass().getResource("/").toURI().getPath(),"wordTemplate.docx");
+            File template=new File(Objects.requireNonNull(getClass().getResource("/"))
+                                          .toURI().getPath(), "wordTemplate.docx");
 
             PbPOIWordTemplate wordTemplate=new PbPOIWordTemplate();
             WordTestDataBean testDataBean=new WordTestDataBean();

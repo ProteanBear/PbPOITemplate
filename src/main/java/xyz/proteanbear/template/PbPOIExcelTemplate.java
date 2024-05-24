@@ -171,16 +171,11 @@ public class PbPOIExcelTemplate
     public void writeTo(FileSuffix fileSuffix, OutputStream outputStream, List<?>... data) throws IOException
     {
         //Declare a workbook
-        Workbook workbook;
-        switch (fileSuffix)
+        Workbook workbook = switch (fileSuffix)
         {
-            case EXCEL_XLSX:
-                workbook = WorkbookFactory.create(true);
-                break;
-            case EXCEL_XLS:
-            default:
-                workbook = WorkbookFactory.create(false);
-        }
+            case EXCEL_XLSX -> WorkbookFactory.create(true);
+            default -> WorkbookFactory.create(false);
+        };
 
         //Create the sheets
         PbPOIExcel pbPOIExcelAnnotation;
