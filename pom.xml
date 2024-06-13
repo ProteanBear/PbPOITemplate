@@ -12,17 +12,20 @@
         <developer_email>moru_1982@hotmail.com</developer_email>
         <!-- Versions -->
         <version_jdk>17</version_jdk>
-        <version_sonatype>1.6.13</version_sonatype>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version_sonatype>1.7.0</version_sonatype>
         <version_maven_release>3.0.1</version_maven_release>
         <version_maven_complier>3.13.0</version_maven_complier>
         <version_maven_gpg>3.2.4</version_maven_gpg>
         <version_maven_source>3.3.1</version_maven_source>
-        <version_maven_javadoc>3.6.3</version_maven_javadoc>
+        <version_maven_javadoc>3.7.0</version_maven_javadoc>
 
         <!-- Add -->
         <version_poi>5.2.5</version_poi>
         <version_junit>5.10.2</version_junit>
         <version_jackson>2.17.1</version_jackson>
+        <version_slf4j>2.0.13</version_slf4j>
+        <version_compress>1.26.2</version_compress>
     </properties>
 
     <!-- Project Information -->
@@ -102,6 +105,25 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
             <version>${version_poi}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.commons</groupId>
+                    <artifactId>commons-compress</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-compress</artifactId>
+            <version>${version_compress}</version>
+        </dependency>
+
+        <!-- Slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${version_slf4j}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Test -->
