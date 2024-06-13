@@ -1,6 +1,7 @@
 package xyz.proteanbear.template.excel;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import xyz.proteanbear.template.annotation.PbPOIExcel;
 import xyz.proteanbear.template.annotation.PbPOIExcelTitle;
 
 import java.util.Date;
@@ -8,6 +9,7 @@ import java.util.Date;
 /**
  *
  */
+@PbPOIExcel(titleLine = -1)
 public class ExcelNoTitleTestBean
 {
     @PbPOIExcelTitle("A")

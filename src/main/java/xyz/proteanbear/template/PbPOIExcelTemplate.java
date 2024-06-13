@@ -49,12 +49,16 @@ public class PbPOIExcelTemplate
      * @throws InstantiationException    instantiation error
      * @throws ParseException            parse error
      */
-    public List<?> readFrom(File excelFile, Class<?> returnClass)
+    public <T> List<T> readFrom(File excelFile, Class<T> returnClass)
             throws IOException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException, InstantiationException, ParseException
     {
         //Load Excel File
         Workbook workbook = WorkbookFactory.create(excelFile);
+
+        //set title line setting in the annotation
+        PbPOIExcel sheetAnnotation = returnClass.getAnnotation(PbPOIExcel.class);
+        if (sheetAnnotation != null) setTitleLine(sheetAnnotation.titleLine());
 
         //title->Annotation map
         Map<String, Object> titleAnnotationMap = new HashMap<>();
@@ -68,7 +72,7 @@ public class PbPOIExcelTemplate
         //All sheets
         Sheet sheet;
         Row row;
-        List<Object> result = new ArrayList<>();
+        List<T> result = new ArrayList<>();
         int pageNum = workbook.getNumberOfSheets();
         for (int page = 0; page < pageNum; page++)
         {
@@ -106,8 +110,8 @@ public class PbPOIExcelTemplate
                 }
 
                 //Create new tClass Object instance
-                Object object = returnClass.getDeclaredConstructor()
-                                           .newInstance();
+                T object = returnClass.getDeclaredConstructor()
+                                      .newInstance();
                 //All cells include null cell
                 for (int index = 0; index < colNum; index++)
                 {
@@ -167,16 +171,11 @@ public class PbPOIExcelTemplate
     public void writeTo(FileSuffix fileSuffix, OutputStream outputStream, List<?>... data) throws IOException
     {
         //Declare a workbook
-        Workbook workbook;
-        switch (fileSuffix)
+        Workbook workbook = switch (fileSuffix)
         {
-            case EXCEL_XLSX:
-                workbook = WorkbookFactory.create(true);
-                break;
-            case EXCEL_XLS:
-            default:
-                workbook = WorkbookFactory.create(false);
-        }
+            case EXCEL_XLSX -> WorkbookFactory.create(true);
+            default -> WorkbookFactory.create(false);
+        };
 
         //Create the sheets
         PbPOIExcel pbPOIExcelAnnotation;
@@ -186,8 +185,8 @@ public class PbPOIExcelTemplate
             if (oneDataList.isEmpty()) continue;
 
             //Get the class corresponding annotation
-            Class curClass = oneDataList.get(0)
-                                        .getClass();
+            Class<?> curClass = oneDataList.get(0)
+                                           .getClass();
             pbPOIExcelAnnotation = oneDataList.get(0)
                                               .getClass()
                                               .getAnnotation(PbPOIExcel.class);
@@ -247,7 +246,7 @@ public class PbPOIExcelTemplate
             // auto resize column
             for (int i = 0; i < getMethodMap.size(); i++)
             {
-                sheet.autoSizeColumn(i,true);
+                sheet.autoSizeColumn(i, true);
             }
         }
 

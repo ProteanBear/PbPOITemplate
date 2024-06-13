@@ -23,20 +23,22 @@ public class PbPOIExcelTemplateTest
      * Test for loading excel file
      */
     @Test
-    @SuppressWarnings("unchecked")
     public void readExcelFileNormalWithTitle()
     {
         try
         {
-            File excelFile=new File(getClass().getResource("/normalWithTitle.xlsx").toURI().getPath());
-            PbPOIExcelTemplate excelTemplate=new PbPOIExcelTemplate();
-            List<ExcelTestBean> list=(List<ExcelTestBean>)excelTemplate
-                    .readFrom(excelFile,ExcelTestBean.class);
+            File excelFile = new File(getClass().getResource("/normalWithTitle.xlsx")
+                                                .toURI()
+                                                .getPath());
+            PbPOIExcelTemplate excelTemplate = new PbPOIExcelTemplate();
+            List<ExcelTestBean> list = excelTemplate
+                    .readFrom(excelFile, ExcelTestBean.class);
 
-            ObjectMapper objectMapper=new ObjectMapper();
-            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(list));
+            ObjectMapper objectMapper = new ObjectMapper();
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter()
+                                           .writeValueAsString(list));
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
@@ -46,21 +48,22 @@ public class PbPOIExcelTemplateTest
      * Test for loading excel file
      */
     @Test
-    @SuppressWarnings("unchecked")
     public void readExcelFileNormalNoTitle()
     {
         try
         {
-            File excelFile=new File(getClass().getResource("/normalNoTitle.xlsx").toURI().getPath());
-            PbPOIExcelTemplate excelTemplate=new PbPOIExcelTemplate();
-            List<ExcelTestBean> list=(List<ExcelTestBean>)excelTemplate
-                    .setTitleLine(-1)
-                    .readFrom(excelFile,ExcelNoTitleTestBean.class);
+            File excelFile = new File(getClass().getResource("/normalNoTitle.xlsx")
+                                                .toURI()
+                                                .getPath());
+            PbPOIExcelTemplate excelTemplate = new PbPOIExcelTemplate();
+            List<ExcelNoTitleTestBean> list = excelTemplate
+                    .readFrom(excelFile, ExcelNoTitleTestBean.class);
 
-            ObjectMapper objectMapper=new ObjectMapper();
-            System.out.println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(list));
+            ObjectMapper objectMapper = new ObjectMapper();
+            System.out.println(objectMapper.writerWithDefaultPrettyPrinter()
+                                           .writeValueAsString(list));
         }
-        catch(Exception e)
+        catch (Exception e)
         {
             e.printStackTrace();
         }
@@ -74,22 +77,24 @@ public class PbPOIExcelTemplateTest
     {
         try
         {
-            File excelFile=new File(getClass().getResource("/").toURI().getPath(),"writeTest.xlsx");
-            List<ExcelTestBean> writeData=new ArrayList<>(5);
-            for(int i=0;i<5;i++)
+            File excelFile = new File(getClass().getResource("/")
+                                                .toURI()
+                                                .getPath(), "writeTest.xlsx");
+            List<ExcelTestBean> writeData = new ArrayList<>(5);
+            for (int i = 0; i < 5; i++)
             {
-                ExcelTestBean excelTestBean=new ExcelTestBean();
-                excelTestBean.setTitle("标题内容"+i+"（"+(i%2==1?"我长点":"短")+"）");
-                excelTestBean.setCount((double)i);
-                excelTestBean.setAverage((double)i/10.0);
+                ExcelTestBean excelTestBean = new ExcelTestBean();
+                excelTestBean.setTitle("标题内容" + i + "（" + (i % 2 == 1 ? "我长点" : "短") + "）");
+                excelTestBean.setCount((double) i);
+                excelTestBean.setAverage((double) i / 10.0);
                 excelTestBean.setDateTime(new Date());
                 writeData.add(excelTestBean);
             }
 
-            PbPOIExcelTemplate excelTemplate=new PbPOIExcelTemplate();
-            excelTemplate.writeTo(excelFile,writeData);
+            PbPOIExcelTemplate excelTemplate = new PbPOIExcelTemplate();
+            excelTemplate.writeTo(excelFile, writeData);
         }
-        catch(IOException | URISyntaxException | FileSuffixNotSupportException e)
+        catch (IOException | URISyntaxException | FileSuffixNotSupportException e)
         {
             e.printStackTrace();
         }

@@ -19,7 +19,7 @@ public enum FileSuffix
     /**
      *
      */
-    private String suffix;
+    private final String suffix;
 
     /**
      * @param suffix the file suffix

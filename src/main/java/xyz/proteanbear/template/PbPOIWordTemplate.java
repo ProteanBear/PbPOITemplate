@@ -1,16 +1,25 @@
 package xyz.proteanbear.template;
 
+import org.apache.poi.common.usermodel.PictureType;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.util.Units;
 import org.apache.poi.xwpf.usermodel.*;
 import org.openxmlformats.schemas.wordprocessingml.x2006.main.CTTbl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import xyz.proteanbear.template.annotation.PbPOIWordVariable;
 import xyz.proteanbear.template.exception.FileSuffixNotSupportException;
 import xyz.proteanbear.template.utils.ClassUtils;
-import xyz.proteanbear.template.utils.FileSuffix;
 
 import java.io.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -21,6 +30,59 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class PbPOIWordTemplate
 {
+    private static Logger logger = LoggerFactory.getLogger(PbPOIWordTemplate.class);
+
+    /**
+     * Record image insertion related content
+     */
+    public static class Image
+    {
+        private String url;
+        private final PictureType type;
+        private final String description;
+        private final int width;
+        private final int height;
+
+        public Image(String url, PictureType type, String description, int width, int height)
+        {
+            this.url = url;
+            this.type = type;
+            this.description = description;
+            this.width = width;
+            this.height = height;
+        }
+
+        public String getUrl()
+        {
+            return url;
+        }
+
+        public void setUrl(String url)
+        {
+            this.url = url;
+        }
+
+        public PictureType getType()
+        {
+            return type;
+        }
+
+        public String getDescription()
+        {
+            return description;
+        }
+
+        public int getWidth()
+        {
+            return width;
+        }
+
+        public int getHeight()
+        {
+            return height;
+        }
+    }
+
     /**
      * The start identifier of the replacement variable
      */
@@ -111,7 +173,6 @@ public class PbPOIWordTemplate
 
         writeTo(
                 templateFile,
-                FileSuffix.getBy(toFile),
                 new FileOutputStream(toFile),
                 data
         );
@@ -121,7 +182,6 @@ public class PbPOIWordTemplate
      * After reading the specified WORD template and replacing the contents of the template, a new WORD file is generated
      *
      * @param templateFile file must exist
-     * @param fileSuffix   File's suffix,including doc and docx
      * @param outputStream Output stream
      * @param data         Replace data objects with template variables declared by annotations
      * @throws IOException               io exception
@@ -129,30 +189,46 @@ public class PbPOIWordTemplate
      * @throws InvocationTargetException Invocation target
      * @throws IllegalAccessException    Illegal access
      */
-    public void writeTo(File templateFile, FileSuffix fileSuffix, OutputStream outputStream, Object data)
+    public void writeTo(File templateFile, OutputStream outputStream, Object data)
             throws IOException, NoSuchMethodException, IllegalAccessException, InvocationTargetException
     {
         //Read Word template file
         if (!templateFile.exists()) throw new IOException("Template file is not exist");
-        XWPFDocument template = new XWPFDocument(new FileInputStream(templateFile));
 
         //Convert data objects to mapping dictionaries based on annotations
-        Map<String, Object> dataMap = ClassUtils.dataMapBy(PbPOIWordVariable.class, data);
+        Map<String, Object> dataMap = ClassUtils.dataMapBy(PbPOIWordVariable.class, data, new ClassUtils.Wrapper()
+        {
+            @Override
+            public <T extends Annotation> Object wrap(T annotation, Object data)
+            {
+                PbPOIWordVariable variable = (PbPOIWordVariable) annotation;
+                //Image path
+                return variable.isImagePath()
+                       ? new PbPOIWordTemplate.Image(
+                        String.valueOf(data),
+                        variable.imageType(),
+                        variable.imageDescription(),
+                        variable.imageWidth(),
+                        variable.imageHeight()
+                ) : data;
+            }
+        });
 
-        //Get ordinary paragraphs and replace all variables
-        List<XWPFParagraph> paragraphList = template.getParagraphs();
-        //Replace variables in the content
-        paragraphList.forEach(paragraph -> replaceParagraph(paragraph, dataMap));
+        try (XWPFDocument template = new XWPFDocument(new FileInputStream(templateFile)); outputStream)
+        {
+            //Get ordinary paragraphs and replace all variables
+            List<XWPFParagraph> paragraphList = template.getParagraphs();
+            //Replace variables in the content
+            paragraphList.forEach(paragraph -> replaceParagraph(paragraph, dataMap));
 
-        //Get table paragraphs and replace
-        List<XWPFTable> tables = template.getTables();
-        //Replace variables in the tables
-        tables.forEach(table -> replaceTableParagraph(table, dataMap));
+            //Get table paragraphs and replace
+            List<XWPFTable> tables = template.getTables();
+            //Replace variables in the tables
+            tables.forEach(table -> replaceTableParagraph(table, dataMap));
 
-        //Write Word file
-        template.write(outputStream);
-        outputStream.close();
-        template.close();
+            //Write Word file
+            template.write(outputStream);
+        }
     }
 
     /**
@@ -181,13 +257,126 @@ public class PbPOIWordTemplate
         variableKey = variableKey.replace(variableStart, "")
                                  .replace(variableEnd, "");
         Object variable = dataMap.getOrDefault(variableKey, "");
-        String variableValue = (variable == null ? "" : String.valueOf(variable));
 
-        //Traversing Runs, replacing the contents of the variable
-        replaceParagraph(paragraph, start, end, variableValue, variableEnd.length());
+        //Image
+        if (variable instanceof Image)
+        {
+            replacePictureParagraph(paragraph, start, end, (Image) variable, variableEnd.length());
+        }
+        else
+        {
+            String variableValue = (variable == null ? "" : String.valueOf(variable));
+            //Traversing Runs, replacing the contents of the variable
+            replaceParagraph(paragraph, start, end, variableValue, variableEnd.length());
+        }
 
         //Check again if there are any variables in the paragraph to replace
         replaceParagraph(paragraph, dataMap);
+    }
+
+    /**
+     * Replace the corresponding variable in the field content
+     *
+     * @param paragraph         include a lot of runs
+     * @param start             Replace the starting fragment position
+     * @param end               Replace the ending fragment position
+     * @param variableValue     Replaced content
+     * @param variableEndLength Replacement terminator length
+     */
+    private void replaceParagraph(
+            XWPFParagraph paragraph, TextSegment start, TextSegment end
+            , String variableValue, int variableEndLength
+    )
+    {
+        //Traversing Runs, replacing the contents of the variable
+        List<XWPFRun> runs = paragraph.getRuns();
+        XWPFRun runStart = runs.get(start.getBeginRun());
+        XWPFRun runEnd = runs.get(end.getEndRun());
+        String textBefore = runStart.text()
+                                    .substring(0, start.getBeginChar());
+        String textAfter = runEnd.text()
+                                 .substring(end.getEndChar() + variableEndLength);
+        StringBuilder builder = new StringBuilder();
+        //If start-run and end-run is in the same sun
+        if (start.getBeginRun() == end.getEndRun())
+        {
+            runStart.setText(
+                    builder.append(textBefore)
+                           .append(variableValue)
+                           .append(textAfter)
+                           .toString()
+                    , 0);
+        }
+        //If start-run and end-run is in the different suns
+        //Insert a new run after start-run
+        else
+        {
+            runStart.setText(
+                    builder.append(textBefore)
+                           .append(variableValue)
+                           .toString()
+                    , 0);
+            runEnd.setText(textAfter, 0);
+            for (int pos = end.getEndRun(); pos > start.getBeginRun(); pos--)
+            {
+                paragraph.removeRun(pos);
+            }
+        }
+    }
+
+    /**
+     * Replace the corresponding variable in the field content with the picture
+     *
+     * @param paragraph         include a lot of runs
+     * @param start             Replace the starting fragment position
+     * @param end               Replace the ending fragment position
+     * @param image             Replaced content
+     * @param variableEndLength Replacement terminator length
+     */
+    private void replacePictureParagraph(
+            XWPFParagraph paragraph, TextSegment start, TextSegment end
+            , Image image, int variableEndLength
+    )
+    {
+        //Traversing Runs, replacing the contents of the variable
+        List<XWPFRun> runs = paragraph.getRuns();
+        XWPFRun runStart = runs.get(start.getBeginRun());
+        XWPFRun runEnd = runs.get(end.getEndRun());
+        String textAfter = runEnd.text()
+                                 .substring(end.getEndChar() + variableEndLength);
+
+        //Read the image file form the url
+        try (InputStream imageInput = new URL(image.url).openStream())
+        {
+            runStart.addPicture(
+                    imageInput,
+                    image.type,
+                    image.description,
+                    Units.toEMU(image.width),
+                    Units.toEMU(image.height)
+            );
+        }
+        catch (IOException | InvalidFormatException e)
+        {
+            logger.error("Add a picture(url:{}) failed:", image.url, e);
+        }
+
+        //If start-run and end-run is in the same sun
+        if (start.getBeginRun() == end.getEndRun())
+        {
+            runStart.setText(" ", 0);
+        }
+        //If start-run and end-run is in the different suns
+        //Insert a new run after start-run
+        else
+        {
+            runStart.setText(" ", 0);
+            runEnd.setText(textAfter, 0);
+            for (int pos = end.getEndRun(); pos > start.getBeginRun(); pos--)
+            {
+                paragraph.removeRun(pos);
+            }
+        }
     }
 
     /**
@@ -317,56 +506,6 @@ public class PbPOIWordTemplate
     }
 
     /**
-     * Replace the corresponding variable in the field content
-     *
-     * @param paragraph         include a lot of runs
-     * @param start             Replace the starting fragment position
-     * @param end               Replace the ending fragment position
-     * @param variableValue     Replaced content
-     * @param variableEndLength Replacement terminator length
-     */
-    private void replaceParagraph(
-            XWPFParagraph paragraph, TextSegment start, TextSegment end
-            , String variableValue, int variableEndLength
-    )
-    {
-        //Traversing Runs, replacing the contents of the variable
-        List<XWPFRun> runs = paragraph.getRuns();
-        XWPFRun runStart = runs.get(start.getBeginRun());
-        XWPFRun runEnd = runs.get(end.getEndRun());
-        String textBefore = runStart.text()
-                                    .substring(0, start.getBeginChar());
-        String textAfter = runEnd.text()
-                                 .substring(end.getEndChar() + variableEndLength);
-        StringBuilder builder = new StringBuilder();
-        //If start-run and end-run is in the same sun
-        if (start.getBeginRun() == end.getEndRun())
-        {
-            runStart.setText(
-                    builder.append(textBefore)
-                           .append(variableValue)
-                           .append(textAfter)
-                           .toString()
-                    , 0);
-        }
-        //If start-run and end-run is in the different suns
-        //Insert a new run after start-run
-        else
-        {
-            runStart.setText(
-                    builder.append(textBefore)
-                           .append(variableValue)
-                           .toString()
-                    , 0);
-            runEnd.setText(textAfter, 0);
-            for (int pos = end.getEndRun(); pos > start.getBeginRun(); pos--)
-            {
-                paragraph.removeRun(pos);
-            }
-        }
-    }
-
-    /**
      * Copy to generate a new line，and insert row into target position.
      *
      * @param pos   insert position
@@ -481,7 +620,7 @@ public class PbPOIWordTemplate
                 Object object = dataMap.get(split[0]);
                 if ((object instanceof ArrayList))
                 {
-                    List curList = (ArrayList) object;
+                    List<?> curList = (ArrayList<?>) object;
                     if (!curList.isEmpty())
                     {
                         dataLength.set(Math.max(dataLength.intValue(), curList.size()));
@@ -498,7 +637,7 @@ public class PbPOIWordTemplate
                         }
                         catch (NoSuchMethodException | NoSuchFieldException e)
                         {
-                            e.printStackTrace();
+                            logger.error(e.getMessage(), e);
                         }
                     }
                 }
@@ -534,7 +673,7 @@ public class PbPOIWordTemplate
             {
                 try
                 {
-                    List list = ((List) ofData.get(getIndexKey()));
+                    List<?> list = ((List<?>) ofData.get(getIndexKey()));
                     if (list != null && !list.isEmpty() && index < list.size())
                     {
                         value = String.valueOf(
@@ -544,7 +683,7 @@ public class PbPOIWordTemplate
                 }
                 catch (IllegalAccessException | InvocationTargetException e)
                 {
-                    e.printStackTrace();
+                    logger.error(e.getMessage(), e);
                     value = "";
                 }
             }
