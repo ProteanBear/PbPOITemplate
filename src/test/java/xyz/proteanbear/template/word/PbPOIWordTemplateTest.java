@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -81,8 +82,9 @@ public class PbPOIWordTemplateTest
 
         wordTemplate.writeTo(
                 template,
-                new FileOutputStream(new File(Objects.requireNonNull(getClass().getResource("/"))
-                                                     .toURI().getPath(), "wordTest.docx")),
+                Files.newOutputStream(new File(Objects.requireNonNull(getClass().getResource("/"))
+                                                      .toURI()
+                                                      .getPath(), "wordTest.docx").toPath()),
                 testDataBean);
     }
 }

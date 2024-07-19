@@ -16,6 +16,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class PbPOIWordTemplate
 {
-    private static Logger logger = LoggerFactory.getLogger(PbPOIWordTemplate.class);
+    private static final Logger logger = LoggerFactory.getLogger(PbPOIWordTemplate.class);
 
     /**
      * Record image insertion related content
@@ -173,7 +174,7 @@ public class PbPOIWordTemplate
 
         writeTo(
                 templateFile,
-                new FileOutputStream(toFile),
+                Files.newOutputStream(toFile.toPath()),
                 data
         );
     }
@@ -214,7 +215,7 @@ public class PbPOIWordTemplate
             }
         });
 
-        try (XWPFDocument template = new XWPFDocument(new FileInputStream(templateFile)); outputStream)
+        try (XWPFDocument template = new XWPFDocument(Files.newInputStream(templateFile.toPath())))
         {
             //Get ordinary paragraphs and replace all variables
             List<XWPFParagraph> paragraphList = template.getParagraphs();
