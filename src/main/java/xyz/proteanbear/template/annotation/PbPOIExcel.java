@@ -13,14 +13,16 @@ import java.lang.annotation.*;
 public @interface PbPOIExcel
 {
     /**
-     * The title of the sheet,using for exporting a excel file.
+     * @return The title of the sheet,using for exporting a excel file.
      */
     String sheetTitle() default "sheet";
 
     /**
-     * Set excel title line's number(start from 0)<br/>
-     * Start calculate from not null row<br/>
-     * If not title row,set -1.
+     * <p>Set excel title line's number(start from 0)</p>
+     * <p>Start calculate from not null row</p>
+     * <p>If not title row,set -1.</p>
+     *
+     * @return line's number(start from 0)
      */
     int titleLine() default 0;
 }

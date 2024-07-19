@@ -20,10 +20,14 @@ public class ClassUtils
      *
      * @param annotationClass the annotation class
      * @param ofClass         the primary class
+     * @param <T>             the type of the annotation
+     * @param <O>             the type of the annotation
      * @return the hash map for the annotation object to the method
      * @throws NoSuchMethodException No such method
      */
-    public static <T extends Annotation,O> Map<T, Method> titleMapGetMethodBy(Class<T> annotationClass, Class<O> ofClass)
+    public static <T extends Annotation, O> Map<T, Method> titleMapGetMethodBy(
+            Class<T> annotationClass, Class<O> ofClass
+    )
             throws NoSuchMethodException
     {
         Map<T, Method> result = new LinkedHashMap<>();
@@ -51,12 +55,14 @@ public class ClassUtils
      * @param annotationClass    the annotation class
      * @param ofClass            the primary class
      * @param titleMapAnnotation the map for title — annotation object
+     * @param <O>                the annotation
+     * @param <T>                the annotation
      * @return the hash map for valueKey to the method
      * @throws NoSuchMethodException     No such method
      * @throws InvocationTargetException Invocation target
      * @throws IllegalAccessException    Illegal access
      */
-    public static <T extends Annotation,O> Map<String, Method> titleMapSetMethodBy(
+    public static <T extends Annotation, O> Map<String, Method> titleMapSetMethodBy(
             Class<T> annotationClass, Class<O> ofClass,
             Map<String, Object> titleMapAnnotation
     )
@@ -94,6 +100,7 @@ public class ClassUtils
      *
      * @param annotationClass the annotation class
      * @param data            data objects with template variables declared by annotations
+     * @param <T>             annotation type
      * @return the hash map for the annotation value() to the data content
      * @throws NoSuchMethodException     No such method
      * @throws InvocationTargetException Invocation target
@@ -115,8 +122,11 @@ public class ClassUtils
      * @throws InvocationTargetException Invocation target
      * @throws IllegalAccessException    Illegal access
      */
-    public static <T extends Annotation> Map<String, Object> dataMapBy(Class<T> annotationClass, Object data, Wrapper wrapper)
-            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public static <T extends Annotation> Map<String, Object> dataMapBy(
+            Class<T> annotationClass, Object data, Wrapper wrapper
+    )
+            throws NoSuchMethodException, InvocationTargetException, IllegalAccessException
+    {
         Map<String, Object> result = new HashMap<>();
 
         //All fields
@@ -125,7 +135,8 @@ public class ClassUtils
         T annotation;
         Method valueMethod, getMethod;
         String method;
-        for (Field field : fields) {
+        for (Field field : fields)
+        {
             //Get annotation
             annotation = field.getAnnotation(annotationClass);
 
@@ -138,7 +149,10 @@ public class ClassUtils
             //field's getter method
             getMethod = methodGetterOf(field, dataClass);
 
-            result.put(method, (wrapper != null ? wrapper.wrap(annotation, getMethod.invoke(data)) : getMethod.invoke(data)));
+            result.put(
+                    method,
+                    (wrapper != null ? wrapper.wrap(annotation, getMethod.invoke(data)) : getMethod.invoke(data))
+            );
         }
 
         return result;
@@ -164,13 +178,14 @@ public class ClassUtils
      *
      * @param field   The class field
      * @param ofClass The class
+     * @param <O>     the type of the field
      * @return The field's getter method
      * @throws NoSuchMethodException No such method
      */
     private static <O> Method methodGetterOf(Field field, Class<O> ofClass) throws NoSuchMethodException
     {
         String name = field.getName();
-        String methodName="get" +
+        String methodName = "get" +
                 String.valueOf(name.charAt(0))
                       .toUpperCase() +
                 (name.length() > 1 ? name.substring(1) : "");
@@ -188,19 +203,23 @@ public class ClassUtils
     private static <O> Method methodSetterOf(Field field, Class<O> ofClass) throws NoSuchMethodException
     {
         String name = field.getName();
-        String methodName="set" +
+        String methodName = "set" +
                 String.valueOf(name.charAt(0))
                       .toUpperCase() +
                 (name.length() > 1 ? name.substring(1) : "");
-        return ofClass.getMethod(methodName,field.getType());
+        return ofClass.getMethod(methodName, field.getType());
     }
 
     /**
      * Wrapper
      */
-    public interface Wrapper {
+    public interface Wrapper
+    {
         /**
-         * Return the wrapped object.
+         * @param annotation the annotation
+         * @param data       the data
+         * @param <T>        the type of the data
+         * @return Return the wrapped object.
          */
         <T extends Annotation> Object wrap(T annotation, Object data);
     }

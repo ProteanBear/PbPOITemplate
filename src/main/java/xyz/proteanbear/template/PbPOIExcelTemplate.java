@@ -41,6 +41,7 @@ public class PbPOIExcelTemplate
      *
      * @param excelFile   The file .xls or .xlsx
      * @param returnClass the class type when return
+     * @param <T>         the class type to return
      * @return the object list of `returnClass`
      * @throws IOException               io exception
      * @throws NoSuchMethodException     no such method
@@ -388,17 +389,17 @@ public class PbPOIExcelTemplate
             cell.setCellStyle(cellStyle);
         }
         //If the content is a picture
-//        else if (content instanceof byte[])
-//        {
-//        }
-//        else if (content instanceof File)
-//        {
-//        }
+        //        else if (content instanceof byte[])
+        //        {
+        //        }
+        //        else if (content instanceof File)
+        //        {
+        //        }
         //If the content is a picture file path
-//        else if ((content instanceof String)
-//                && pbPOIExcelTitle.isFilePath())
-//        {
-//        }
+        //        else if ((content instanceof String)
+        //                && pbPOIExcelTitle.isFilePath())
+        //        {
+        //        }
         //Other
         else
         {
