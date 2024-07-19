@@ -43,6 +43,7 @@ public enum FileSuffix
      *
      * @param file file object
      * @return file type suffix
+     * @throws FileSuffixNotSupportException Throw exception if file type is not supported
      */
     public static FileSuffix getBy(File file) throws FileSuffixNotSupportException
     {
