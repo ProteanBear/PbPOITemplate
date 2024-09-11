@@ -16,10 +16,10 @@ public class WordTestDataBean
     @PbPOIWordVariable("organization-specialties")
     private String specialties;
 
-    @PbPOIWordVariable(value = "organization-image", isImagePath = true, imageType = PictureType.PNG, imageDescription = "测试图片", imageWidth = 166)
+    @PbPOIWordVariable(value = "organization-image", isImagePath = true, imageType = PictureType.PNG, imageDescription = "测试图片")
     private String image;
 
-    @PbPOIWordVariable(value = "test-image", isImagePath = true, imageType = PictureType.PNG, imageDescription = "测试图片2", imageWidth = 166)
+    @PbPOIWordVariable(value = "test-image", isImagePath = true, imageType = PictureType.PNG, imageDescription = "测试图片2")
     private String testImage;
 
     @PbPOIWordVariable("doctor")
@@ -35,7 +35,7 @@ public class WordTestDataBean
 
     public void setDrugBeanList(List<WordTestDrugBean> drugBeanList)
     {
-        this.drugBeanList=drugBeanList;
+        this.drugBeanList = drugBeanList;
     }
 
     public String getCaseNumber()
@@ -45,7 +45,7 @@ public class WordTestDataBean
 
     public void setCaseNumber(String caseNumber)
     {
-        this.caseNumber=caseNumber;
+        this.caseNumber = caseNumber;
     }
 
     public String getName()
@@ -55,7 +55,7 @@ public class WordTestDataBean
 
     public void setName(String name)
     {
-        this.name=name;
+        this.name = name;
     }
 
     public String getSpecialties()
@@ -65,7 +65,7 @@ public class WordTestDataBean
 
     public void setSpecialties(String specialties)
     {
-        this.specialties=specialties;
+        this.specialties = specialties;
     }
 
     public List<WordTestDoctorBean> getDoctorBeanList()
@@ -75,7 +75,7 @@ public class WordTestDataBean
 
     public void setDoctorBeanList(List<WordTestDoctorBean> doctorBeanList)
     {
-        this.doctorBeanList=doctorBeanList;
+        this.doctorBeanList = doctorBeanList;
     }
 
     public String getImage()

@@ -371,12 +371,36 @@ public class PbPOIWordTemplate
                 if (bufferedImage == null) throw new IOException("Read image file failed.");
 
                 //self-adaption
-                int width = (image.getAdaption() == PbPOIWordVariable.AdaptionType.HEIGHT)
-                            ? (bufferedImage.getWidth() * image.getHeight() / bufferedImage.getHeight())
-                            : image.getWidth();
-                int height = (image.getAdaption() == PbPOIWordVariable.AdaptionType.WIDTH)
-                             ? ((image.getWidth() * bufferedImage.getHeight()) / bufferedImage.getWidth())
-                             : image.getHeight();
+                //Calculate Image Size
+                int width = bufferedImage.getWidth();
+                int height = bufferedImage.getHeight();
+                switch (image.getAdaption())
+                {
+                    case WIDTH:
+                        width = image.getWidth();
+                        height = (image.getWidth() * bufferedImage.getHeight()) / bufferedImage.getWidth();
+                        break;
+                    case HEIGHT:
+                        width = bufferedImage.getWidth() * image.getHeight() / bufferedImage.getHeight();
+                        height = image.getHeight();
+                        break;
+                    case AUTO:
+                        if (bufferedImage.getWidth() > PbPOIWordVariable.MAX_DOC_WIDTH)
+                        {
+                            width = PbPOIWordVariable.MAX_DOC_WIDTH;
+                            height = (width * bufferedImage.getHeight()) / bufferedImage.getWidth();
+                        }
+                        else if (bufferedImage.getHeight() > PbPOIWordVariable.MAX_DOC_HEIGHT)
+                        {
+                            height = PbPOIWordVariable.MAX_DOC_HEIGHT;
+                            width = bufferedImage.getWidth() * height / bufferedImage.getHeight();
+                        }
+                        break;
+                    case NONE:
+                    default:
+                        width = image.getWidth();
+                        height = image.getHeight();
+                }
 
                 runStart.addPicture(
                         imageInput,

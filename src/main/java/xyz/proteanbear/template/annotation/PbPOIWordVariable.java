@@ -24,15 +24,18 @@ public @interface PbPOIWordVariable
 
     String imageDescription() default "";
 
-    int imageWidth() default 480;
+    int imageWidth() default MAX_DOC_WIDTH;
 
-    int imageHeight() default 360;
+    int imageHeight() default MAX_DOC_HEIGHT;
 
     //Image self adaption
-    AdaptionType adaption() default AdaptionType.NONE;
+    AdaptionType adaption() default AdaptionType.AUTO;
 
     enum AdaptionType
     {
-        WIDTH, HEIGHT, NONE
+        WIDTH, HEIGHT, AUTO, NONE
     }
+
+    int MAX_DOC_WIDTH = 400;
+    int MAX_DOC_HEIGHT = 700;
 }
