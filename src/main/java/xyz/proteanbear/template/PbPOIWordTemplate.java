@@ -385,14 +385,14 @@ public class PbPOIWordTemplate
                         height = image.getHeight();
                         break;
                     case AUTO:
-                        if (bufferedImage.getWidth() > PbPOIWordVariable.MAX_DOC_WIDTH)
+                        if (bufferedImage.getWidth() > image.getWidth())
                         {
-                            width = PbPOIWordVariable.MAX_DOC_WIDTH;
+                            width = image.getWidth();
                             height = (width * bufferedImage.getHeight()) / bufferedImage.getWidth();
                         }
-                        else if (bufferedImage.getHeight() > PbPOIWordVariable.MAX_DOC_HEIGHT)
+                        else if (bufferedImage.getHeight() > image.getHeight())
                         {
-                            height = PbPOIWordVariable.MAX_DOC_HEIGHT;
+                            height = image.getHeight();
                             width = bufferedImage.getWidth() * height / bufferedImage.getHeight();
                         }
                         break;
