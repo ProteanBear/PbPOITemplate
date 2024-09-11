@@ -16,10 +16,10 @@ public class WordTestDataBean
     @PbPOIWordVariable("organization-specialties")
     private String specialties;
 
-    @PbPOIWordVariable(value = "organization-image", isImagePath = true, imageType = PictureType.PNG, imageDescription = "测试图片", imageWidth = 166, imageHeight = 373)
+    @PbPOIWordVariable(value = "organization-image", isImagePath = true, imageType = PictureType.PNG, imageDescription = "测试图片", imageWidth = 166)
     private String image;
 
-    @PbPOIWordVariable(value = "test-image", isImagePath = true, imageType = PictureType.PNG, imageDescription = "测试图片2", imageWidth = 166, imageHeight = 373)
+    @PbPOIWordVariable(value = "test-image", isImagePath = true, imageType = PictureType.PNG, imageDescription = "测试图片2", imageWidth = 166)
     private String testImage;
 
     @PbPOIWordVariable("doctor")

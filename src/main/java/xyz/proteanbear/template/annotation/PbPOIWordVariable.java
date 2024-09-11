@@ -27,4 +27,12 @@ public @interface PbPOIWordVariable
     int imageWidth() default 480;
 
     int imageHeight() default 360;
+
+    //Image self adaption
+    AdaptionType adaption() default AdaptionType.NONE;
+
+    enum AdaptionType
+    {
+        WIDTH, HEIGHT, NONE
+    }
 }

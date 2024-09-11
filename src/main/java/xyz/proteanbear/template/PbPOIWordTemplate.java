@@ -11,7 +11,12 @@ import xyz.proteanbear.template.annotation.PbPOIWordVariable;
 import xyz.proteanbear.template.exception.FileSuffixNotSupportException;
 import xyz.proteanbear.template.utils.ClassUtils;
 
-import java.io.*;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -43,14 +48,19 @@ public class PbPOIWordTemplate
         private final String description;
         private final int width;
         private final int height;
+        private final PbPOIWordVariable.AdaptionType adaption;
 
-        public Image(String url, PictureType type, String description, int width, int height)
+        public Image(
+                String url, PictureType type, String description, int width, int height,
+                PbPOIWordVariable.AdaptionType adaption
+        )
         {
             this.url = url;
             this.type = type;
             this.description = description;
             this.width = width;
             this.height = height;
+            this.adaption = adaption;
         }
 
         public String getUrl()
@@ -81,6 +91,11 @@ public class PbPOIWordTemplate
         public int getHeight()
         {
             return height;
+        }
+
+        public PbPOIWordVariable.AdaptionType getAdaption()
+        {
+            return adaption;
         }
     }
 
@@ -210,7 +225,8 @@ public class PbPOIWordTemplate
                         variable.imageType(),
                         variable.imageDescription(),
                         variable.imageWidth(),
-                        variable.imageHeight()
+                        variable.imageHeight(),
+                        variable.adaption()
                 ) : data;
             }
         });
@@ -347,19 +363,33 @@ public class PbPOIWordTemplate
                                  .substring(end.getEndChar() + variableEndLength);
 
         //Read the image file form the url
-        try (InputStream imageInput = new URL(image.url).openStream())
+        if (image.url != null)
         {
-            runStart.addPicture(
-                    imageInput,
-                    image.type,
-                    image.description,
-                    Units.toEMU(image.width),
-                    Units.toEMU(image.height)
-            );
-        }
-        catch (IOException | InvalidFormatException e)
-        {
-            logger.error("Add a picture(url:{}) failed:", image.url, e);
+            try (InputStream imageInput = new URL(image.url).openStream())
+            {
+                BufferedImage bufferedImage = ImageIO.read(new URL(image.url));
+                if (bufferedImage == null) throw new IOException("Read image file failed.");
+
+                //self-adaption
+                int width = (image.getAdaption() == PbPOIWordVariable.AdaptionType.HEIGHT)
+                            ? (bufferedImage.getWidth() * image.getHeight() / bufferedImage.getHeight())
+                            : image.getWidth();
+                int height = (image.getAdaption() == PbPOIWordVariable.AdaptionType.WIDTH)
+                             ? ((image.getWidth() * bufferedImage.getHeight()) / bufferedImage.getWidth())
+                             : image.getHeight();
+
+                runStart.addPicture(
+                        imageInput,
+                        image.type,
+                        image.description,
+                        Units.toEMU(width),
+                        Units.toEMU(height)
+                );
+            }
+            catch (IOException | InvalidFormatException e)
+            {
+                logger.error("Add a picture(url:{}) failed:", image.url, e);
+            }
         }
 
         //If start-run and end-run is in the same sun
