@@ -21,7 +21,7 @@
         <version.maven-javadoc>3.10.0</version.maven-javadoc>
 
         <!-- Add -->
-        <version_poi>5.2.5</version_poi>
+        <version_poi>5.4.0</version_poi>
         <version_junit>5.10.2</version_junit>
         <version_jackson>2.17.1</version_jackson>
         <version_slf4j>2.0.13</version_slf4j>
